@@ -7,11 +7,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
 // Spout Start
 import org.spoutcraft.client.block.SpoutcraftChunk;
-// Spout End
 import org.spoutcraft.client.config.Configuration;
+// Spout End
 
 public class Chunk {
 
@@ -77,6 +76,7 @@ public class Chunk {
 	/** The time according to World.worldTime when this chunk was last saved */
 	public long lastSaveTime;
 	public boolean deferRender;
+	public int field_82912_p;
 
 	/**
 	 * Contains the current round-robin relight check index, and is implied as the relight check location as well.
@@ -88,7 +88,6 @@ public class Chunk {
 	public SpoutcraftChunk spoutChunk;
 	int grassColorCache = -1;
 	int waterColorCache = -1;
-	//used in mp
 	public boolean canBeUnloaded = false;
 	// Spout End
 
@@ -104,6 +103,7 @@ public class Chunk {
 		this.hasEntities = false;
 		this.lastSaveTime = 0L;
 		this.deferRender = false;
+		this.field_82912_p = 0;
 		this.queuedLightChecks = 4096;
 		this.field_76653_p = false;
 		this.entityLists = new List[16];
@@ -137,7 +137,7 @@ public class Chunk {
 						int var10 = var8 >> 4;
 
 						if (this.storageArrays[var10] == null) {
-							this.storageArrays[var10] = new ExtendedBlockStorage(var10 << 4);
+							this.storageArrays[var10] = new ExtendedBlockStorage(var10 << 4, !par1World.provider.hasNoSky);
 						}
 
 						this.storageArrays[var10].setExtBlockID(var6, var8 & 15, var7, var9);
@@ -220,6 +220,7 @@ public class Chunk {
 	 */
 	public void generateSkylightMap() {
 		int var1 = this.getTopFilledSegment();
+		this.field_82912_p = Integer.MAX_VALUE;
 		int var2;
 		int var3;
 
@@ -238,6 +239,10 @@ public class Chunk {
 						}
 
 						this.heightMap[var3 << 4 | var2] = var4;
+
+						if (var4 < this.field_82912_p) {
+							this.field_82912_p = var4;
+						}
 					}
 
 					if (!this.worldObj.provider.hasNoSky) {
@@ -252,7 +257,7 @@ public class Chunk {
 
 								if (var6 != null) {
 									var6.setExtSkylightValue(var2, var5 & 15, var3, var4);
-									this.worldObj.func_72902_n((this.xPosition << 4) + var2, var5, (this.zPosition << 4) + var3);
+									this.worldObj.markBlockForRenderUpdate((this.xPosition << 4) + var2, var5, (this.zPosition << 4) + var3);
 								}
 							}
 
@@ -297,10 +302,10 @@ public class Chunk {
 						int var3 = this.getHeightValue(var1, var2);
 						int var4 = this.xPosition * 16 + var1;
 						int var5 = this.zPosition * 16 + var2;
-						int var6 = this.worldObj.getHeightValue(var4 - 1, var5);
-						int var7 = this.worldObj.getHeightValue(var4 + 1, var5);
-						int var8 = this.worldObj.getHeightValue(var4, var5 - 1);
-						int var9 = this.worldObj.getHeightValue(var4, var5 + 1);
+						int var6 = this.worldObj.func_82734_g(var4 - 1, var5);
+						int var7 = this.worldObj.func_82734_g(var4 + 1, var5);
+						int var8 = this.worldObj.func_82734_g(var4, var5 - 1);
+						int var9 = this.worldObj.func_82734_g(var4, var5 + 1);
 
 						if (var7 < var6) {
 							var6 = var7;
@@ -384,7 +389,7 @@ public class Chunk {
 
 						if (var9 != null) {
 							var9.setExtSkylightValue(par1, var8 & 15, par3, 15);
-							this.worldObj.func_72902_n((this.xPosition << 4) + par1, var8, (this.zPosition << 4) + par3);
+							this.worldObj.markBlockForRenderUpdate((this.xPosition << 4) + par1, var8, (this.zPosition << 4) + par3);
 						}
 					}
 				} else {
@@ -393,7 +398,7 @@ public class Chunk {
 
 						if (var9 != null) {
 							var9.setExtSkylightValue(par1, var8 & 15, par3, 0);
-							this.worldObj.func_72902_n((this.xPosition << 4) + par1, var8, (this.zPosition << 4) + par3);
+							this.worldObj.markBlockForRenderUpdate((this.xPosition << 4) + par1, var8, (this.zPosition << 4) + par3);
 						}
 					}
 				}
@@ -429,6 +434,10 @@ public class Chunk {
 			if (var8 < var4) {
 				var12 = var8;
 				var13 = var4;
+			}
+
+			if (var8 < this.field_82912_p) {
+				this.field_82912_p = var8;
 			}
 
 			if (!this.worldObj.provider.hasNoSky) {
@@ -503,7 +512,7 @@ public class Chunk {
 					return false;
 				}
 
-				var10 = this.storageArrays[par2 >> 4] = new ExtendedBlockStorage(par2 >> 4 << 4);
+				var10 = this.storageArrays[par2 >> 4] = new ExtendedBlockStorage(par2 >> 4 << 4, !this.worldObj.provider.hasNoSky);
 				var11 = par2 >= var7;
 			}
 
@@ -613,7 +622,7 @@ public class Chunk {
 	 */
 	public int getSavedLightValue(EnumSkyBlock par1EnumSkyBlock, int par2, int par3, int par4) {
 		ExtendedBlockStorage var5 = this.storageArrays[par3 >> 4];
-		return var5 == null ? (this.canBlockSeeTheSky(par2, par3, par4) ? par1EnumSkyBlock.defaultLightValue : 0) : (par1EnumSkyBlock == EnumSkyBlock.Sky ? var5.getExtSkylightValue(par2, par3 & 15, par4) : (par1EnumSkyBlock == EnumSkyBlock.Block ? var5.getExtBlocklightValue(par2, par3 & 15, par4) : par1EnumSkyBlock.defaultLightValue));
+		return var5 == null ? (this.canBlockSeeTheSky(par2, par3, par4) ? par1EnumSkyBlock.defaultLightValue : 0) : (par1EnumSkyBlock == EnumSkyBlock.Sky ? (this.worldObj.provider.hasNoSky ? 0 : var5.getExtSkylightValue(par2, par3 & 15, par4)) : (par1EnumSkyBlock == EnumSkyBlock.Block ? var5.getExtBlocklightValue(par2, par3 & 15, par4) : par1EnumSkyBlock.defaultLightValue));
 	}
 
 	/**
@@ -624,7 +633,7 @@ public class Chunk {
 		ExtendedBlockStorage var6 = this.storageArrays[par3 >> 4];
 
 		if (var6 == null) {
-			var6 = this.storageArrays[par3 >> 4] = new ExtendedBlockStorage(par3 >> 4 << 4);
+			var6 = this.storageArrays[par3 >> 4] = new ExtendedBlockStorage(par3 >> 4 << 4, !this.worldObj.provider.hasNoSky);
 			this.generateSkylightMap();
 		}
 
@@ -773,7 +782,7 @@ public class Chunk {
 	 */
 	public void setChunkBlockTileEntity(int par1, int par2, int par3, TileEntity par4TileEntity) {
 		ChunkPosition var5 = new ChunkPosition(par1, par2, par3);
-		par4TileEntity.func_70308_a(this.worldObj);
+		par4TileEntity.setWorldObj(this.worldObj);
 		par4TileEntity.xCoord = this.xPosition * 16 + par1;
 		par4TileEntity.yCoord = par2;
 		par4TileEntity.zCoord = this.zPosition * 16 + par3;
@@ -805,16 +814,12 @@ public class Chunk {
 	public void onChunkLoad() {
 		this.isChunkLoaded = true;
 		this.worldObj.addTileEntity(this.chunkTileEntityMap.values());
-		List[] var1 = this.entityLists;
-		int var2 = var1.length;
 
-		for (int var3 = 0; var3 < var2; ++var3) {
-			List var4 = var1[var3];
-			this.worldObj.addLoadedEntities(var4);
+		for (int var1 = 0; var1 < this.entityLists.length; ++var1) {
+			this.worldObj.addLoadedEntities(this.entityLists[var1]);
 		}
 
-		// Spout Start
-		//note: onChunkLoad is only called in SP
+		// Spout Start - onChunkLoad is only called in SP
 		SpoutcraftChunk.loadedChunks.add(spoutChunk);
 		// Spout End
 	}
@@ -831,12 +836,8 @@ public class Chunk {
 			this.worldObj.markTileEntityForDespawn(var2);
 		}
 
-		List[] var5 = this.entityLists;
-		int var6 = var5.length;
-
-		for (int var3 = 0; var3 < var6; ++var3) {
-			List var4 = var5[var3];
-			this.worldObj.unloadEntities(var4);
+		for (int var3 = 0; var3 < this.entityLists.length; ++var3) {
+			this.worldObj.unloadEntities(this.entityLists[var3]);
 		}
 
 		// Spout Start
@@ -869,10 +870,9 @@ public class Chunk {
 
 		for (int var6 = var4; var6 <= var5; ++var6) {
 			List var7 = this.entityLists[var6];
-			Iterator var8 = var7.iterator();
 
-			while (var8.hasNext()) {
-				Entity var9 = (Entity)var8.next();
+			for (int var8 = 0; var8 < var7.size(); ++var8) {
+				Entity var9 = (Entity)var7.get(var8);
 
 				if (var9 != par1Entity && var9.boundingBox.intersectsWith(par2AxisAlignedBB)) {
 					par3List.add(var9);
@@ -895,31 +895,30 @@ public class Chunk {
 	/**
 	 * Gets all entities that can be assigned to the specified class. Args: entityClass, aabb, listToFill
 	 */
-	public void getEntitiesOfTypeWithinAAAB(Class par1Class, AxisAlignedBB par2AxisAlignedBB, List par3List) {
-		int var4 = MathHelper.floor_double((par2AxisAlignedBB.minY - 2.0D) / 16.0D);
-		int var5 = MathHelper.floor_double((par2AxisAlignedBB.maxY + 2.0D) / 16.0D);
+	public void getEntitiesOfTypeWithinAAAB(Class par1Class, AxisAlignedBB par2AxisAlignedBB, List par3List, IEntitySelector par4IEntitySelector) {
+		int var5 = MathHelper.floor_double((par2AxisAlignedBB.minY - 2.0D) / 16.0D);
+		int var6 = MathHelper.floor_double((par2AxisAlignedBB.maxY + 2.0D) / 16.0D);
 
-		if (var4 < 0) {
-			var4 = 0;
-		} else if (var4 >= this.entityLists.length) {
-			var4 = this.entityLists.length - 1;
-		}
-
-		if (var5 >= this.entityLists.length) {
-			var5 = this.entityLists.length - 1;
-		} else if (var5 < 0) {
+		if (var5 < 0) {
 			var5 = 0;
+		} else if (var5 >= this.entityLists.length) {
+			var5 = this.entityLists.length - 1;
 		}
 
-		for (int var6 = var4; var6 <= var5; ++var6) {
-			List var7 = this.entityLists[var6];
-			Iterator var8 = var7.iterator();
+		if (var6 >= this.entityLists.length) {
+			var6 = this.entityLists.length - 1;
+		} else if (var6 < 0) {
+			var6 = 0;
+		}
 
-			while (var8.hasNext()) {
-				Entity var9 = (Entity)var8.next();
+		for (int var7 = var5; var7 <= var6; ++var7) {
+			List var8 = this.entityLists[var7];
 
-				if (par1Class.isAssignableFrom(var9.getClass()) && var9.boundingBox.intersectsWith(par2AxisAlignedBB)) {
-					par3List.add(var9);
+			for (int var9 = 0; var9 < var8.size(); ++var9) {
+				Entity var10 = (Entity)var8.get(var9);
+
+				if (par1Class.isAssignableFrom(var10.getClass()) && var10.boundingBox.intersectsWith(par2AxisAlignedBB) && (par4IEntitySelector == null || par4IEntitySelector.isEntityApplicable(var10))) {
+					par3List.add(var10);
 				}
 			}
 		}
@@ -930,10 +929,10 @@ public class Chunk {
 	 */
 	public boolean needsSaving(boolean par1) {
 		if (par1) {
-			if (this.hasEntities && this.worldObj.getWorldTime() != this.lastSaveTime) {
+			if (this.hasEntities && this.worldObj.getTotalWorldTime() != this.lastSaveTime) {
 				return true;
 			}
-		} else if (this.hasEntities && this.worldObj.getWorldTime() >= this.lastSaveTime + 600L) {
+		} else if (this.hasEntities && this.worldObj.getTotalWorldTime() >= this.lastSaveTime + 600L) {
 			return true;
 		}
 
@@ -1043,64 +1042,67 @@ public class Chunk {
 	 */
 	public void fillChunk(byte[] par1ArrayOfByte, int par2, int par3, boolean par4) {
 		int var5 = 0;
-		int var6;
+		boolean var6 = !this.worldObj.provider.hasNoSky;
+		int var7;
 
-		for (var6 = 0; var6 < this.storageArrays.length; ++var6) {
-			if ((par2 & 1 << var6) != 0) {
-				if (this.storageArrays[var6] == null) {
-					this.storageArrays[var6] = new ExtendedBlockStorage(var6 << 4);
+		for (var7 = 0; var7 < this.storageArrays.length; ++var7) {
+			if ((par2 & 1 << var7) != 0) {
+				if (this.storageArrays[var7] == null) {
+					this.storageArrays[var7] = new ExtendedBlockStorage(var7 << 4, var6);
 				}
 
-				byte[] var7 = this.storageArrays[var6].getBlockLSBArray();
-				System.arraycopy(par1ArrayOfByte, var5, var7, 0, var7.length);
-				var5 += var7.length;
-			} else if (par4 && this.storageArrays[var6] != null) {
-				this.storageArrays[var6] = null;
+				byte[] var8 = this.storageArrays[var7].getBlockLSBArray();
+				System.arraycopy(par1ArrayOfByte, var5, var8, 0, var8.length);
+				var5 += var8.length;
+			} else if (par4 && this.storageArrays[var7] != null) {
+				this.storageArrays[var7] = null;
 			}
 		}
 
-		NibbleArray var8;
+		NibbleArray var9;
 
-		for (var6 = 0; var6 < this.storageArrays.length; ++var6) {
-			if ((par2 & 1 << var6) != 0 && this.storageArrays[var6] != null) {
-				var8 = this.storageArrays[var6].getMetadataArray();
-				System.arraycopy(par1ArrayOfByte, var5, var8.data, 0, var8.data.length);
-				var5 += var8.data.length;
+		for (var7 = 0; var7 < this.storageArrays.length; ++var7) {
+			if ((par2 & 1 << var7) != 0 && this.storageArrays[var7] != null) {
+				var9 = this.storageArrays[var7].getMetadataArray();
+				System.arraycopy(par1ArrayOfByte, var5, var9.data, 0, var9.data.length);
+				var5 += var9.data.length;
 			}
 		}
 
-		for (var6 = 0; var6 < this.storageArrays.length; ++var6) {
-			if ((par2 & 1 << var6) != 0 && this.storageArrays[var6] != null) {
-				var8 = this.storageArrays[var6].getBlocklightArray();
-				System.arraycopy(par1ArrayOfByte, var5, var8.data, 0, var8.data.length);
-				var5 += var8.data.length;
+		for (var7 = 0; var7 < this.storageArrays.length; ++var7) {
+			if ((par2 & 1 << var7) != 0 && this.storageArrays[var7] != null) {
+				var9 = this.storageArrays[var7].getBlocklightArray();
+				System.arraycopy(par1ArrayOfByte, var5, var9.data, 0, var9.data.length);
+				var5 += var9.data.length;
 			}
 		}
 
-		for (var6 = 0; var6 < this.storageArrays.length; ++var6) {
-			if ((par2 & 1 << var6) != 0 && this.storageArrays[var6] != null) {
-				var8 = this.storageArrays[var6].getSkylightArray();
-				System.arraycopy(par1ArrayOfByte, var5, var8.data, 0, var8.data.length);
-				var5 += var8.data.length;
+		if (var6) {
+			for (var7 = 0; var7 < this.storageArrays.length; ++var7) {
+				if ((par2 & 1 << var7) != 0 && this.storageArrays[var7] != null) {
+					var9 = this.storageArrays[var7].getSkylightArray();
+					System.arraycopy(par1ArrayOfByte, var5, var9.data, 0, var9.data.length);
+					var5 += var9.data.length;
+				}
 			}
 		}
 
-		for (var6 = 0; var6 < this.storageArrays.length; ++var6) {
-			if ((par3 & 1 << var6) != 0) {
-				if (this.storageArrays[var6] == null) {
+		for (var7 = 0; var7 < this.storageArrays.length; ++var7) {
+			if ((par3 & 1 << var7) != 0) {
+				if (this.storageArrays[var7] == null) {
 					var5 += 2048;
 				} else {
-					var8 = this.storageArrays[var6].getBlockMSBArray();
+					var9 = this.storageArrays[var7].getBlockMSBArray();
 
-					if (var8 == null) {
-						var8 = this.storageArrays[var6].createBlockMSBArray();
+					if (var9 == null) {
+						var9 = this.storageArrays[var7].createBlockMSBArray();
 					}
 
-					System.arraycopy(par1ArrayOfByte, var5, var8.data, 0, var8.data.length);
-					var5 += var8.data.length;
+					System.arraycopy(par1ArrayOfByte, var5, var9.data, 0, var9.data.length);
+					var5 += var9.data.length;
 				}
-			} else if (par4 && this.storageArrays[var6] != null && this.storageArrays[var6].getBlockMSBArray() != null) {
-				this.storageArrays[var6].func_76676_h();
+			} else if (par4 && this.storageArrays[var7] != null && this.storageArrays[var7].getBlockMSBArray() != null) {
+				this.storageArrays[var7].clearMSBArray();
 			}
 		}
 
@@ -1109,9 +1111,9 @@ public class Chunk {
 			int var10000 = var5 + this.blockBiomeArray.length;
 		}
 
-		for (var6 = 0; var6 < this.storageArrays.length; ++var6) {
-			if (this.storageArrays[var6] != null && (par2 & 1 << var6) != 0) {
-				this.storageArrays[var6].removeInvalidBlocks();
+		for (var7 = 0; var7 < this.storageArrays.length; ++var7) {
+			if (this.storageArrays[var7] != null && (par2 & 1 << var7) != 0) {
+				this.storageArrays[var7].removeInvalidBlocks();
 			}
 		}
 
@@ -1119,8 +1121,8 @@ public class Chunk {
 		Iterator var10 = this.chunkTileEntityMap.values().iterator();
 
 		while (var10.hasNext()) {
-			TileEntity var9 = (TileEntity)var10.next();
-			var9.updateContainingBlockInfo();
+			TileEntity var11 = (TileEntity)var10.next();
+			var11.updateContainingBlockInfo();
 		}
 	}
 

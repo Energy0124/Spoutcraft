@@ -1,9 +1,9 @@
 package net.minecraft.src;
 
 import java.util.Random;
-// Spout Start
-import org.spoutcraft.client.config.Configuration;
-// Spout End
+// MCPatcher Start
+import com.pclewis.mcpatcher.mod.Colorizer;
+// MCPatcher End
 
 public abstract class BlockFluid extends Block {
 	protected BlockFluid(int par1, Material par2Material) {
@@ -27,31 +27,26 @@ public abstract class BlockFluid extends Block {
 	 * first determining what to render.
 	 */
 	public int colorMultiplier(IBlockAccess par1IBlockAccess, int par2, int par3, int par4) {
-		// Spout Start - Biome water
 		if (this.blockMaterial != Material.water) {
-			return 0xffffff;
-		}
-		int color = par1IBlockAccess.getWaterColorCache(par2, par3, par4);
-		if (color == -1 || Configuration.isFancyBiomeColors()) {
-		
+			return 16777215;
+		} else {
 			int var5 = 0;
 			int var6 = 0;
 			int var7 = 0;
 
 			for (int var8 = -1; var8 <= 1; ++var8) {
 				for (int var9 = -1; var9 <= 1; ++var9) {
-					int var10 = par1IBlockAccess.getBiomeGenForCoords(par2 + var9, par4 + var8).waterColorMultiplier;
+					// MCPatcher Start
+					int var10 = Colorizer.colorizeWater(par1IBlockAccess, par2 + var9, par4 + var8);
+					// MCPatcher End
 					var5 += (var10 & 16711680) >> 16;
 					var6 += (var10 & 65280) >> 8;
 					var7 += var10 & 255;
 				}
 			}
 
-			color = (var5 / 9 & 255) << 16 | (var6 / 9 & 255) << 8 | var7 / 9 & 255;
-			par1IBlockAccess.setWaterColorCache(par2, par3, par4, color);
+			return (var5 / 9 & 255) << 16 | (var6 / 9 & 255) << 8 | var7 / 9 & 255;
 		}
-		return color;
-		// Spout End - Biome Water
 	}
 
 	/**
@@ -171,7 +166,7 @@ public abstract class BlockFluid extends Block {
 	 * Returns a vector indicating the direction and intensity of fluid flow.
 	 */
 	private Vec3 getFlowVector(IBlockAccess par1IBlockAccess, int par2, int par3, int par4) {
-		Vec3 var5 = Vec3.getVec3Pool().getVecFromPool(0.0D, 0.0D, 0.0D);
+		Vec3 var5 = par1IBlockAccess.getWorldVec3Pool().getVecFromPool(0.0D, 0.0D, 0.0D);
 		int var6 = this.getEffectiveFlowDecay(par1IBlockAccess, par2, par3, par4);
 
 		for (int var7 = 0; var7 < 4; ++var7) {
@@ -388,7 +383,7 @@ public abstract class BlockFluid extends Block {
 			var6 = par1World.getBlockMetadata(par2, par3, par4);
 
 			if (var6 > 0 && var6 < 8) {
-				par1World.playSound((double)((float)par2 + 0.5F), (double)((float)par3 + 0.5F), (double)((float)par4 + 0.5F), "liquid.water", par5Random.nextFloat() * 0.25F + 0.75F, par5Random.nextFloat() * 1.0F + 0.5F);
+				par1World.playSound((double)((float)par2 + 0.5F), (double)((float)par3 + 0.5F), (double)((float)par4 + 0.5F), "liquid.water", par5Random.nextFloat() * 0.25F + 0.75F, par5Random.nextFloat() * 1.0F + 0.5F, false);
 			}
 		}
 
@@ -402,11 +397,11 @@ public abstract class BlockFluid extends Block {
 				var22 = (double)par3 + this.maxY;
 				var23 = (double)((float)par4 + par5Random.nextFloat());
 				par1World.spawnParticle("lava", var21, var22, var23, 0.0D, 0.0D, 0.0D);
-				par1World.playSound(var21, var22, var23, "liquid.lavapop", 0.2F + par5Random.nextFloat() * 0.2F, 0.9F + par5Random.nextFloat() * 0.15F);
+				par1World.playSound(var21, var22, var23, "liquid.lavapop", 0.2F + par5Random.nextFloat() * 0.2F, 0.9F + par5Random.nextFloat() * 0.15F, false);
 			}
 
 			if (par5Random.nextInt(200) == 0) {
-				par1World.playSound((double)par2, (double)par3, (double)par4, "liquid.lava", 0.2F + par5Random.nextFloat() * 0.2F, 0.9F + par5Random.nextFloat() * 0.15F);
+				par1World.playSound((double)par2, (double)par3, (double)par4, "liquid.lava", 0.2F + par5Random.nextFloat() * 0.2F, 0.9F + par5Random.nextFloat() * 0.15F, false);
 			}
 		}
 

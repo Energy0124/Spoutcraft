@@ -6,23 +6,24 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.io.IOException;
-// Spout HD Start
-/*
-import javax.imageio.ImageIO;
-*/
-import com.pclewis.mcpatcher.mod.TextureUtils;
-// Spout HD End
+// MCPatcher Start
+//import javax.imageio.ImageIO;
+import com.pclewis.mcpatcher.TexturePackAPI;
+// MCPatcher End
 
 class CanvasMojangLogo extends Canvas {
 
+	/** BufferedImage containing the Mojang logo. */
 	private BufferedImage logo;
 
 	public CanvasMojangLogo() {
 		try {
-			// Spout HD Start
-			this.logo = TextureUtils.getResourceAsBufferedImage("/gui/crash_logo.png");
-			// Spout HD End
-		} catch (IOException var2) {
+			// MCPatcher Start
+			this.logo = TexturePackAPI.getImage(PanelCrashReport.class, "/gui/crash_logo.png");
+			// MCPatcher End
+		// Spout Start
+		} catch (Exception var2) {
+		// Spout End
 			;
 		}
 

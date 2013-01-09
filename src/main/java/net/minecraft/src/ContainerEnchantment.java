@@ -1,8 +1,10 @@
 package net.minecraft.src;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+// Spout Start
+import java.util.Iterator;
+// Spout End
 
 public class ContainerEnchantment extends Container {
 
@@ -46,26 +48,25 @@ public class ContainerEnchantment extends Container {
 		return tableInventory;
 	}
 	// Spout End
-	
+
 	public void addCraftingToCrafters(ICrafting par1ICrafting) {
 		super.addCraftingToCrafters(par1ICrafting);
-		par1ICrafting.updateCraftingInventoryInfo(this, 0, this.enchantLevels[0]);
-		par1ICrafting.updateCraftingInventoryInfo(this, 1, this.enchantLevels[1]);
-		par1ICrafting.updateCraftingInventoryInfo(this, 2, this.enchantLevels[2]);
+		par1ICrafting.sendProgressBarUpdate(this, 0, this.enchantLevels[0]);
+		par1ICrafting.sendProgressBarUpdate(this, 1, this.enchantLevels[1]);
+		par1ICrafting.sendProgressBarUpdate(this, 2, this.enchantLevels[2]);
 	}
 
 	/**
-	 * Updates crafting matrix; called from onCraftMatrixChanged. Args: none
+	 * Looks for changes made in the container, sends them to every listener.
 	 */
-	public void updateCraftingResults() {
-		super.updateCraftingResults();
-		Iterator var1 = this.crafters.iterator();
+	public void detectAndSendChanges() {
+		super.detectAndSendChanges();
 
-		while (var1.hasNext()) {
-			ICrafting var2 = (ICrafting)var1.next();
-			var2.updateCraftingInventoryInfo(this, 0, this.enchantLevels[0]);
-			var2.updateCraftingInventoryInfo(this, 1, this.enchantLevels[1]);
-			var2.updateCraftingInventoryInfo(this, 2, this.enchantLevels[2]);
+		for (int var1 = 0; var1 < this.crafters.size(); ++var1) {
+			ICrafting var2 = (ICrafting)this.crafters.get(var1);
+			var2.sendProgressBarUpdate(this, 0, this.enchantLevels[0]);
+			var2.sendProgressBarUpdate(this, 1, this.enchantLevels[1]);
+			var2.sendProgressBarUpdate(this, 2, this.enchantLevels[2]);
 		}
 	}
 
@@ -128,7 +129,7 @@ public class ContainerEnchantment extends Container {
 						this.enchantLevels[var4] = EnchantmentHelper.calcItemStackEnchantability(this.rand, var4, var3, var2);
 					}
 
-					this.updateCraftingResults();
+					this.detectAndSendChanges();
 				}
 			} else {
 				for (var3 = 0; var3 < 3; ++var3) {
@@ -147,14 +148,27 @@ public class ContainerEnchantment extends Container {
 		if (this.enchantLevels[par2] > 0 && var3 != null && (par1EntityPlayer.experienceLevel >= this.enchantLevels[par2] || par1EntityPlayer.capabilities.isCreativeMode)) {
 			if (!this.worldPointer.isRemote) {
 				List var4 = EnchantmentHelper.buildEnchantmentList(this.rand, var3, this.enchantLevels[par2]);
+				boolean var5 = var3.itemID == Item.book.itemID;
 
 				if (var4 != null) {
-					par1EntityPlayer.removeExperience(this.enchantLevels[par2]);
-					Iterator var5 = var4.iterator();
+					par1EntityPlayer.addExperienceLevel(-this.enchantLevels[par2]);
 
-					while (var5.hasNext()) {
-						EnchantmentData var6 = (EnchantmentData)var5.next();
-						var3.addEnchantment(var6.enchantmentobj, var6.enchantmentLevel);
+					if (var5) {
+						var3.itemID = Item.field_92105_bW.itemID;
+					}
+
+					int var6 = var5 ? this.rand.nextInt(var4.size()) : -1;
+
+					for (int var7 = 0; var7 < var4.size(); ++var7) {
+						EnchantmentData var8 = (EnchantmentData)var4.get(var7);
+
+						if (!var5 || var7 == var6) {
+							if (var5) {
+								Item.field_92105_bW.func_92115_a(var3, var8);
+							} else {
+								var3.addEnchantment(var8.enchantmentobj, var8.enchantmentLevel);
+							}
+						}
 					}
 
 					this.onCraftMatrixChanged(this.tableInventory);
@@ -187,47 +201,47 @@ public class ContainerEnchantment extends Container {
 	}
 
 	/**
-	 * Called to transfer a stack from one inventory to the other eg. when shift clicking.
+	 * Called when a player shift-clicks on a slot. You must override this or you will crash when someone does that.
 	 */
-	public ItemStack transferStackInSlot(int par1) {
-		ItemStack var2 = null;
-		Slot var3 = (Slot)this.inventorySlots.get(par1);
+	public ItemStack transferStackInSlot(EntityPlayer par1EntityPlayer, int par2) {
+		ItemStack var3 = null;
+		Slot var4 = (Slot)this.inventorySlots.get(par2);
 
-		if (var3 != null && var3.getHasStack()) {
-			ItemStack var4 = var3.getStack();
-			var2 = var4.copy();
+		if (var4 != null && var4.getHasStack()) {
+			ItemStack var5 = var4.getStack();
+			var3 = var5.copy();
 
-			if (par1 == 0) {
-				if (!this.mergeItemStack(var4, 1, 37, true)) {
+			if (par2 == 0) {
+				if (!this.mergeItemStack(var5, 1, 37, true)) {
 					return null;
 				}
 			} else {
-				if (((Slot)this.inventorySlots.get(0)).getHasStack() || !((Slot)this.inventorySlots.get(0)).isItemValid(var4)) {
+				if (((Slot)this.inventorySlots.get(0)).getHasStack() || !((Slot)this.inventorySlots.get(0)).isItemValid(var5)) {
 					return null;
 				}
 
-				if (var4.hasTagCompound() && var4.stackSize == 1) {
-					((Slot)this.inventorySlots.get(0)).putStack(var4.copy());
-					var4.stackSize = 0;
-				} else if (var4.stackSize >= 1) {
-					((Slot)this.inventorySlots.get(0)).putStack(new ItemStack(var4.itemID, 1, var4.getItemDamage()));
-					--var4.stackSize;
+				if (var5.hasTagCompound() && var5.stackSize == 1) {
+					((Slot)this.inventorySlots.get(0)).putStack(var5.copy());
+					var5.stackSize = 0;
+				} else if (var5.stackSize >= 1) {
+					((Slot)this.inventorySlots.get(0)).putStack(new ItemStack(var5.itemID, 1, var5.getItemDamage()));
+					--var5.stackSize;
 				}
 			}
 
-			if (var4.stackSize == 0) {
-				var3.putStack((ItemStack)null);
+			if (var5.stackSize == 0) {
+				var4.putStack((ItemStack)null);
 			} else {
-				var3.onSlotChanged();
+				var4.onSlotChanged();
 			}
 
-			if (var4.stackSize == var2.stackSize) {
+			if (var5.stackSize == var3.stackSize) {
 				return null;
 			}
 
-			var3.onPickupFromSlot(var4);
+			var4.onPickupFromSlot(par1EntityPlayer, var5);
 		}
 
-		return var2;
+		return var3;
 	}
 }

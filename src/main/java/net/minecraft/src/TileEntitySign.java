@@ -15,7 +15,7 @@ public class TileEntitySign extends TileEntity {
 
 	// Spout Start
 	private byte text = -1; //-1 means invalid cache, 0 means false, 1 means true
-	
+
 	public boolean hasText() {
 		if (text != -1) {
 			return text != 0;
@@ -29,12 +29,12 @@ public class TileEntitySign extends TileEntity {
 		}
 		return text != 0;
 	}
-	
+
 	public void recalculateText() {
 		text = -1;
 	}
 	// Spout End
-	
+
 	/**
 	 * Writes a tile entity to NBT.
 	 */
@@ -66,9 +66,9 @@ public class TileEntitySign extends TileEntity {
 	}
 
 	/**
-	 * signs and mobSpawners use this to send text and meta-data
+	 * Overriden in a sign to provide the text.
 	 */
-	public Packet getAuxillaryInfoPacket() {
+	public Packet getDescriptionPacket() {
 		String[] var1 = new String[4];
 		System.arraycopy(this.signText, 0, var1, 0, 4);
 		return new Packet130UpdateSign(this.xCoord, this.yCoord, this.zCoord, var1);

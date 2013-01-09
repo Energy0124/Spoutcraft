@@ -60,6 +60,7 @@ public class ServerItem implements ListWidgetItem {
 	public static final int WHITELIST = 1;
 	public static final int GRAYLIST = 2;
 	public static final int BLACKLIST = 3;
+	public int versionWidth = 10;
 
 	protected byte accessType = ServerItem.OPEN;
 
@@ -72,7 +73,7 @@ public class ServerItem implements ListWidgetItem {
 
 	protected PollResult pollResult;
 
-	private static final String latestMC = "1.0";
+	private static final String latestMC = "1.4.7";
 	protected String mcversion = latestMC;
 	private boolean showPing = false;
 
@@ -128,10 +129,9 @@ public class ServerItem implements ListWidgetItem {
 
 	public void render(int x, int y, int width, int height) {
 		MCRenderDelegate r = (MCRenderDelegate) Spoutcraft.getRenderDelegate();
-
 		if (databaseId != -1) {
-			String iconUrl = "http://static.spout.org/server/thumb/" + databaseId + ".png";
-			Texture icon = CustomTextureManager.getTextureFromUrl(iconUrl);
+			String iconUrl = "http://cdn.spout.org/server/thumb/" + databaseId + ".png";
+			Texture icon = CustomTextureManager.getTextureFromUrl("Spoutcraft", iconUrl);
 			if (icon == null) {
 				CustomTextureManager.downloadTexture(iconUrl, true);
 				icon = CustomTextureManager.getTextureFromJar("/res/icon/unknown_server.png");
@@ -273,15 +273,18 @@ public class ServerItem implements ListWidgetItem {
 			GL11.glPopMatrix();
 			iconMargin += 5 + 7;
 		}
-
-		// TODO Outdated version alert
-		/*if (!mcversion.equals(latestMC)) {
-			GL11.glPushMatrix();
-			GL11.glTranslatef(x+width/5, y-0.5F, 0);
-			GL11.glRotatef(-37.5F, 0F, 0F, 1F);
-			font.drawStringWithShadow("Outdated!", 0, 0, 0xFF0000);
+		
+		if (pollResult.getVersion() != null) {	
+			GL11.glPushMatrix();			
+			versionWidth = font.getStringWidth("1.0.0");
+			font.drawStringWithShadow(pollResult.getVersion(), x + width - versionWidth - 20, y + 21, 0x00FF00);			
 			GL11.glPopMatrix();
-		}*/
+		} else {
+			GL11.glPushMatrix();			
+			versionWidth = font.getStringWidth("Unknown");
+			font.drawStringWithShadow("Unknown", x + width - versionWidth - 20, y + 21, 0xFF0000);			
+			GL11.glPopMatrix();
+		}
 	}
 
 	public void onClick(int x, int y, boolean doubleClick) {

@@ -5,9 +5,11 @@ import java.util.Iterator;
 import java.util.Random;
 import java.util.Set;
 import net.minecraft.client.Minecraft;
+// Spout Start
 import org.spoutcraft.client.SpoutClient;
 import org.spoutcraft.client.config.Configuration;
 import org.spoutcraft.client.packet.PacketCustomBlockChunkOverride;
+// Spout End
 
 public class WorldClient extends World {
 
@@ -46,6 +48,7 @@ public class WorldClient extends World {
 	 */
 	public void tick() {
 		super.tick();
+		this.func_82738_a(this.getTotalWorldTime() + 1L);
 		this.setWorldTime(this.getWorldTime() + 1L);
 		this.theProfiler.startSection("reEntryProcessing");
 
@@ -118,13 +121,15 @@ public class WorldClient extends World {
 	public void doPreChunk(int par1, int par2, boolean par3) {
 		if (par3) {
 			this.clientChunkProvider.loadChunk(par1, par2);
+			// Spout Start
 			SpoutClient.getInstance().getPacketManager().sendSpoutPacket(new PacketCustomBlockChunkOverride(par1, par2));
+			// Spout End
 		} else {
 			this.clientChunkProvider.unloadChunk(par1, par2);
 		}
 
 		if (!par3) {
-			this.markBlocksDirty(par1 * 16, 0, par2 * 16, par1 * 16 + 15, 256, par2 * 16 + 15);
+			this.markBlockRangeForRenderUpdate(par1 * 16, 0, par2 * 16, par1 * 16 + 15, 256, par2 * 16 + 15);
 		}
 	}
 
@@ -154,7 +159,9 @@ public class WorldClient extends World {
 	/**
 	 * Start the skin for this entity downloading, if necessary, and increment its reference counter
 	 */
-	public void obtainEntitySkin(Entity par1Entity) { // Spout protected -> public
+	// Spout Start - protected to public
+	public void obtainEntitySkin(Entity par1Entity) {
+	// Spout End
 		super.obtainEntitySkin(par1Entity);
 
 		if (this.entitySpawnQueue.contains(par1Entity)) {
@@ -165,7 +172,9 @@ public class WorldClient extends World {
 	/**
 	 * Decrement the reference counter for this entity's skin image data
 	 */
-	public void releaseEntitySkin(Entity par1Entity) { // Spout protected -> public
+	// Spout Start - protected to public
+	public void releaseEntitySkin(Entity par1Entity) {
+	// Spout End
 		super.releaseEntitySkin(par1Entity);
 
 		if (this.entityList.contains(par1Entity)) {
@@ -198,10 +207,10 @@ public class WorldClient extends World {
 	}
 
 	/**
-	 * Lookup and return an Entity based on its ID
+	 * Returns the Entity with the given ID, or null if it doesn't exist in this World.
 	 */
 	public Entity getEntityByID(int par1) {
-		return (Entity)this.entityHashSet.lookup(par1);
+		return (Entity)(par1 == this.mc.thePlayer.entityId ? this.mc.thePlayer : (Entity)this.entityHashSet.lookup(par1));
 	}
 
 	public Entity removeEntityFromWorld(int par1) {
@@ -227,15 +236,15 @@ public class WorldClient extends World {
 		this.sendQueue.quitWithPacket(new Packet255KickDisconnect("Quitting"));
 	}
 
+	public IUpdatePlayerListBox func_82735_a(EntityMinecart par1EntityMinecart) {
+		return new SoundUpdaterMinecart(this.mc.sndManager, par1EntityMinecart, this.mc.thePlayer);
+	}
+
 	/**
 	 * Updates all weather states.
 	 */
 	protected void updateWeather() {
 		if (!this.provider.hasNoSky) {
-			if (this.lastLightningBolt > 0) {
-				--this.lastLightningBolt;
-			}
-
 			this.prevRainingStrength = this.rainingStrength;
 
 			if (this.worldInfo.isRaining()) {
@@ -346,26 +355,37 @@ public class WorldClient extends World {
 	/**
 	 * Adds some basic stats of the world to the given crash report.
 	 */
-	public CrashReport addWorldInfoToCrashReport(CrashReport par1CrashReport) {
-		par1CrashReport = super.addWorldInfoToCrashReport(par1CrashReport);
-		par1CrashReport.addCrashSectionCallable("Forced Entities", new CallableMPL1(this));
-		par1CrashReport.addCrashSectionCallable("Retry Entities", new CallableMPL2(this));
-		return par1CrashReport;
+	public CrashReportCategory addWorldInfoToCrashReport(CrashReport par1CrashReport) {
+		CrashReportCategory var2 = super.addWorldInfoToCrashReport(par1CrashReport);
+		var2.addCrashSectionCallable("Forced entities", new CallableMPL1(this));
+		var2.addCrashSectionCallable("Retry entities", new CallableMPL2(this));
+		return var2;
 	}
 
 	/**
 	 * par8 is loudness, all pars passed to minecraftInstance.sndManager.playSound
 	 */
-	public void playSound(double par1, double par3, double par5, String par7Str, float par8, float par9) {
-		float var10 = 16.0F;
+	public void playSound(double par1, double par3, double par5, String par7Str, float par8, float par9, boolean par10) {
+		float var11 = 16.0F;
 
 		if (par8 > 1.0F) {
-			var10 *= par8;
+			var11 *= par8;
 		}
 
-		if (this.mc.renderViewEntity.getDistanceSq(par1, par3, par5) < (double)(var10 * var10)) {
-			this.mc.sndManager.playSound(par7Str, (float)par1, (float)par3, (float)par5, par8, par9);
+		double var12 = this.mc.renderViewEntity.getDistanceSq(par1, par3, par5);
+
+		if (var12 < (double)(var11 * var11)) {
+			if (par10 && var12 > 100.0D) {
+				double var14 = Math.sqrt(var12) / 40.0D;
+				this.mc.sndManager.func_92070_a(par7Str, (float)par1, (float)par3, (float)par5, par8, par9, (int)Math.round(var14 * 20.0D));
+			} else {
+				this.mc.sndManager.playSound(par7Str, (float)par1, (float)par3, (float)par5, par8, par9);
+			}
 		}
+	}
+
+	public void func_92088_a(double par1, double par3, double par5, double par7, double par9, double par11, NBTTagCompound par13NBTTagCompound) {
+		this.mc.effectRenderer.addEffect(new EntityFireworkStarterFX(this, par1, par3, par5, par7, par9, par11, this.mc.effectRenderer, par13NBTTagCompound));
 	}
 
 	static Set getEntityList(WorldClient par0WorldClient) {

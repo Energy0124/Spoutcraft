@@ -168,8 +168,7 @@ public class BiomeDecorator {
 	/**
 	 * Decorates the world. Calls code that was formerly (pre-1.8) in ChunkProviderGenerate.populate
 	 */
-	// Spout Start
-	//Synchronize instead of throwing exceptions
+	// Spout Start - Synchronize instead of throwing exceptions.
 	public synchronized void decorate(World par1World, Random par2Random, int par3, int par4) {
 		/*
 		if (this.currentWorld != null) {
@@ -177,6 +176,7 @@ public class BiomeDecorator {
 		} else {
 		*/
 		{
+	// Spout End
 			this.currentWorld = par1World;
 			this.randomGenerator = par2Random;
 			this.chunk_X = par3;
@@ -186,7 +186,6 @@ public class BiomeDecorator {
 			this.randomGenerator = null;
 		}
 	}
-	// Spout End
 
 	/**
 	 * The method that does the work of actually decorating chunks

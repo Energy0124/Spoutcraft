@@ -51,20 +51,17 @@ public class ActiveRenderInfo {
 	public static FloatBuffer modelMatrix;
 	public static FloatBuffer projectionMatrix;
 	// Spout End
-	
+
 	/**
 	 * Updates the current render info and camera location based on entity look angles and 1st/3rd person view mode
 	 */
 	public static void updateRenderInfo(EntityPlayer par0EntityPlayer, boolean par1) {
 		GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, modelview);
 		GL11.glGetFloat(GL11.GL_PROJECTION_MATRIX, projection);
-
 		// Spout Start
 		modelMatrix = modelview.duplicate();
 		projectionMatrix = projection.duplicate();
 		// Spout End
-
-
 		GL11.glGetInteger(GL11.GL_VIEWPORT, viewport);
 		float var2 = (float)((viewport.get(0) + viewport.get(2)) / 2);
 		float var3 = (float)((viewport.get(1) + viewport.get(3)) / 2);
@@ -92,7 +89,7 @@ public class ActiveRenderInfo {
 		double var9 = var3 + (double)(objectX * 1.0F);
 		double var11 = var5 + (double)(objectY * 1.0F);
 		double var13 = var7 + (double)(objectZ * 1.0F);
-		return Vec3.getVec3Pool().getVecFromPool(var9, var11, var13);
+		return par0EntityLiving.worldObj.getWorldVec3Pool().getVecFromPool(var9, var11, var13);
 	}
 
 	/**

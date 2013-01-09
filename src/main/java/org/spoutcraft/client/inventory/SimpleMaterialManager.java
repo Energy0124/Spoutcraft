@@ -25,6 +25,7 @@ import java.util.List;
 import gnu.trove.map.hash.TIntByteHashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.src.Item;
 
 import org.spoutcraft.api.util.map.TIntPairFloatHashMap;
@@ -257,25 +258,39 @@ public class SimpleMaterialManager implements MaterialManager {
 	@SuppressWarnings("unchecked")
 	@Override
 	public String getToolTip(ItemStack is) {
-		net.minecraft.src.ItemStack itemstack = new net.minecraft.src.ItemStack(is.getTypeId(), is.getAmount(), is.getDurability());
+		net.minecraft.src.ItemStack itemstack = null;
+		if (is instanceof CraftItemStack) {
+			itemstack = ((CraftItemStack)is).item;
+		}
+		else {
+			itemstack = is.asNMSItenStack();
+		}
+
 		Item rawItem = Item.itemsList[itemstack.itemID];
 		List<String> list;
 		if (rawItem != null) {
-			list = itemstack.getItemNameandInformation();
+			list = itemstack.getTooltip(Minecraft.theMinecraft.thePlayer, Minecraft.theMinecraft.gameSettings.advancedItemTooltips);
 		} else {
 			list = new ArrayList<String>();
 		}
 		Material item = MaterialData.getMaterial(is.getTypeId(), is.getDurability());
 		String custom = item != null ? String.format(item.getName(), String.valueOf(is.getDurability())) : null;
-		if (custom != null && is.getTypeId() != Item.potion.shiftedIndex) {
-			list.set(0, custom);
+		if (custom != null && is.getTypeId() != Item.potion.itemID) {
+			if (list.size() > 0) {
+				list.set(0, custom);
+			} else {
+				list.add(custom);
+			}
 		}
 		if (list.size() > 0) {
 			String tooltip = "";
 			int lines = 0;
 			for (int i = 0; i < list.size(); i++) {
 				String s = (String)list.get(i);
-				if (i == 0) {
+				if (i == 0 && rawItem!=null) {
+					if (itemstack != null && itemstack.hasDisplayName()) {
+						s = "\u00a7o" + itemstack.getDisplayName() + "\u00a7r";
+					}
 					s = (new StringBuilder()).append("\247").append(Integer.toHexString(itemstack.getRarity().rarityColor)).append(s).toString();
 				} else {
 					s = (new StringBuilder()).append("\2477").append(s).toString();

@@ -59,7 +59,7 @@ public class SpoutItem extends Item {
 	}
 
 	@Override
-	public boolean tryPlaceIntoWorld(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int face, float xOffset, float yOffset, float zOffset) {
+	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int face, float xOffset, float yOffset, float zOffset) {
 		if (stack.itemID == MaterialData.flint.getRawId()) {
 			int damage = stack.getItemDamage();
 			if (damage >= 1024) {
@@ -74,7 +74,7 @@ public class SpoutItem extends Item {
 				return false;
 			}
 		}
-		return super.tryPlaceIntoWorld(stack, player, world, x, y, z, face, xOffset, yOffset, zOffset);
+		return super.onItemUse(stack, player, world, x, y, z, face, xOffset, yOffset, zOffset);
 	}
 
 	// From super class
@@ -106,7 +106,7 @@ public class SpoutItem extends Item {
 		if (world.canPlaceEntityOnSide(id, x, y, z, false, side, player)) {
 			Block var8 = Block.blocksList[id];
 			if (world.setBlockAndMetadataWithNotify(x, y, z, id, 0)) {
-				Block.blocksList[id].updateBlockMetadata(world, x, y, z, side, xOffset, yOffset, zOffset);
+				Block.blocksList[id].onBlockPlaced(world, x, y, z, side, xOffset, yOffset, zOffset, 0);
 				Block.blocksList[id].onBlockPlacedBy(world, x, y, z, player);
 
 				world.world.getChunkAt(x, y, z).setCustomBlockId(x, y, z, (short) block.getCustomId());
@@ -121,6 +121,6 @@ public class SpoutItem extends Item {
 
 	@Override
 	public boolean hasEffect(ItemStack par1ItemStack) {
-		return shiftedIndex == MaterialData.flint.getRawId() ? false : super.hasEffect(par1ItemStack);
+		return itemID == MaterialData.flint.getRawId() ? false : super.hasEffect(par1ItemStack);
 	}
 }

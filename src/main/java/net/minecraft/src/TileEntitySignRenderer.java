@@ -1,9 +1,11 @@
 package net.minecraft.src;
 
-import net.minecraft.client.Minecraft;
-
 import org.lwjgl.opengl.GL11;
-import org.spoutcraft.client.config.Configuration; // Spout
+
+// Spout Start
+import net.minecraft.client.Minecraft;
+import org.spoutcraft.client.config.Configuration;
+// Spout End
 
 public class TileEntitySignRenderer extends TileEntitySpecialRenderer {
 
@@ -55,18 +57,22 @@ public class TileEntitySignRenderer extends TileEntitySpecialRenderer {
 			viewer = Minecraft.theMinecraft.thePlayer;
 		}
 		if (Configuration.getSignDistance() == Integer.MAX_VALUE || viewer != null && par1TileEntitySign.getDistanceFrom(viewer.posX, viewer.posY, viewer.posZ) < (Configuration.getSignDistance() * Configuration.getSignDistance())) {
+		// Spout End
 		FontRenderer var17 = this.getFontRenderer();
 		var12 = 0.016666668F * var10;
 		GL11.glTranslatef(0.0F, 0.5F * var10, 0.07F * var10);
 		GL11.glScalef(var12, -var12, var12);
 		GL11.glNormal3f(0.0F, 0.0F, -1.0F * var12);
 		GL11.glDepthMask(false);
+		// Spout Start
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		// Spout End
 		byte var13 = 0;
 
 		for (int var14 = 0; var14 < par1TileEntitySign.signText.length; ++var14) {
 			String var15 = par1TileEntitySign.signText[var14];
+
 			if (var14 == par1TileEntitySign.lineBeingEdited) {
 				// Spout Start
 				int endColumnStart = Math.min(par1TileEntitySign.columnBeingEdited,  var15.length());
@@ -88,6 +94,7 @@ public class TileEntitySignRenderer extends TileEntitySpecialRenderer {
 
 		GL11.glDepthMask(true);
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+		// Spout Start
 		}
 		}
 		// Spout End

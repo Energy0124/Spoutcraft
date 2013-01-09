@@ -7,7 +7,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+// Spout Start
 import net.minecraft.client.Minecraft;
+// Spout End
 
 public class Profiler {
 
@@ -27,7 +29,7 @@ public class Profiler {
 	private final Map profilingMap = new HashMap();
 
 	/**
-	 * Clear profiling
+	 * Clear profiling.
 	 */
 	public void clearProfiling() {
 		this.profilingMap.clear();
@@ -39,7 +41,9 @@ public class Profiler {
 	 * Start section
 	 */
 	public void startSection(String par1Str) {
-		if (this.profilingEnabled && Thread.currentThread() == Minecraft.mainThread) { //Spout
+		// Spout Start
+		if (this.profilingEnabled && Thread.currentThread() == Minecraft.mainThread) {
+		// Spout End
 			if (this.profilingSection.length() > 0) {
 				this.profilingSection = this.profilingSection + ".";
 			}
@@ -54,7 +58,9 @@ public class Profiler {
 	 * End section
 	 */
 	public void endSection() {
-		if (this.profilingEnabled && Thread.currentThread() == Minecraft.mainThread) { //Spout
+		// Spout Start
+		if (this.profilingEnabled && Thread.currentThread() == Minecraft.mainThread) {
+		// Spout End
 			long var1 = System.nanoTime();
 			long var3 = ((Long)this.timestampList.remove(this.timestampList.size() - 1)).longValue();
 			this.sectionList.remove(this.sectionList.size() - 1);
@@ -150,7 +156,7 @@ public class Profiler {
 		this.startSection(par1Str);
 	}
 
-	public String func_76322_c() {
+	public String getNameOfLastSection() {
 		return this.sectionList.size() == 0 ? "[UNKNOWN]" : (String)this.sectionList.get(this.sectionList.size() - 1);
 	}
 }

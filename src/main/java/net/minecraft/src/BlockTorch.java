@@ -6,7 +6,7 @@ public class BlockTorch extends Block {
 	protected BlockTorch(int par1, int par2) {
 		super(par1, par2, Material.circuits);
 		this.setTickRandomly(true);
-		this.setCreativeTab(CreativeTabs.tabDeco);
+		this.setCreativeTab(CreativeTabs.tabDecorations);
 	}
 
 	/**
@@ -47,7 +47,7 @@ public class BlockTorch extends Block {
 			return true;
 		} else {
 			int var5 = par1World.getBlockId(par2, par3, par4);
-			return var5 == Block.fence.blockID || var5 == Block.netherFence.blockID || var5 == Block.glass.blockID;
+			return var5 == Block.fence.blockID || var5 == Block.netherFence.blockID || var5 == Block.glass.blockID || var5 == Block.cobblestoneWall.blockID;
 		}
 	}
 
@@ -59,32 +59,32 @@ public class BlockTorch extends Block {
 	}
 
 	/**
-	 * called before onBlockPlacedBy by ItemBlock and ItemReed
+	 * Called when a block is placed using its ItemBlock. Args: World, X, Y, Z, side, hitX, hitY, hitZ, block metadata
 	 */
-	public void updateBlockMetadata(World par1World, int par2, int par3, int par4, int par5, float par6, float par7, float par8) {
-		int var9 = par1World.getBlockMetadata(par2, par3, par4);
+	public int onBlockPlaced(World par1World, int par2, int par3, int par4, int par5, float par6, float par7, float par8, int par9) {
+		int var10 = par9;
 
 		if (par5 == 1 && this.canPlaceTorchOn(par1World, par2, par3 - 1, par4)) {
-			var9 = 5;
+			var10 = 5;
 		}
 
 		if (par5 == 2 && par1World.isBlockNormalCubeDefault(par2, par3, par4 + 1, true)) {
-			var9 = 4;
+			var10 = 4;
 		}
 
 		if (par5 == 3 && par1World.isBlockNormalCubeDefault(par2, par3, par4 - 1, true)) {
-			var9 = 3;
+			var10 = 3;
 		}
 
 		if (par5 == 4 && par1World.isBlockNormalCubeDefault(par2 + 1, par3, par4, true)) {
-			var9 = 2;
+			var10 = 2;
 		}
 
 		if (par5 == 5 && par1World.isBlockNormalCubeDefault(par2 - 1, par3, par4, true)) {
-			var9 = 1;
+			var10 = 1;
 		}
 
-		par1World.setBlockMetadataWithNotify(par2, par3, par4, var9);
+		return var10;
 	}
 
 	/**
@@ -102,16 +102,18 @@ public class BlockTorch extends Block {
 	 * Called whenever the block is added into the world. Args: world, x, y, z
 	 */
 	public void onBlockAdded(World par1World, int par2, int par3, int par4) {
-		if (par1World.isBlockNormalCubeDefault(par2 - 1, par3, par4, true)) {
-			par1World.setBlockMetadataWithNotify(par2, par3, par4, 1);
-		} else if (par1World.isBlockNormalCubeDefault(par2 + 1, par3, par4, true)) {
-			par1World.setBlockMetadataWithNotify(par2, par3, par4, 2);
-		} else if (par1World.isBlockNormalCubeDefault(par2, par3, par4 - 1, true)) {
-			par1World.setBlockMetadataWithNotify(par2, par3, par4, 3);
-		} else if (par1World.isBlockNormalCubeDefault(par2, par3, par4 + 1, true)) {
-			par1World.setBlockMetadataWithNotify(par2, par3, par4, 4);
-		} else if (this.canPlaceTorchOn(par1World, par2, par3 - 1, par4)) {
-			par1World.setBlockMetadataWithNotify(par2, par3, par4, 5);
+		if (par1World.getBlockMetadata(par2, par3, par4) == 0) {
+			if (par1World.isBlockNormalCubeDefault(par2 - 1, par3, par4, true)) {
+				par1World.setBlockMetadataWithNotify(par2, par3, par4, 1);
+			} else if (par1World.isBlockNormalCubeDefault(par2 + 1, par3, par4, true)) {
+				par1World.setBlockMetadataWithNotify(par2, par3, par4, 2);
+			} else if (par1World.isBlockNormalCubeDefault(par2, par3, par4 - 1, true)) {
+				par1World.setBlockMetadataWithNotify(par2, par3, par4, 3);
+			} else if (par1World.isBlockNormalCubeDefault(par2, par3, par4 + 1, true)) {
+				par1World.setBlockMetadataWithNotify(par2, par3, par4, 4);
+			} else if (this.canPlaceTorchOn(par1World, par2, par3 - 1, par4)) {
+				par1World.setBlockMetadataWithNotify(par2, par3, par4, 5);
+			}
 		}
 
 		this.dropTorchIfCantStay(par1World, par2, par3, par4);
@@ -198,13 +200,13 @@ public class BlockTorch extends Block {
 	 * A randomly called display update to be able to add particles or other items for display
 	 */
 	public void randomDisplayTick(World par1World, int par2, int par3, int par4, Random par5Random) {
-		// Spout custom blocks start
+		// Spout Start - Custom blocks
 		Chunk c = par1World.getChunkFromBlockCoords(par2, par4);
 		if (c.spoutChunk.getCustomBlockId(par2, par3, par4) > 0) {
 			return;
 		}
 		int var6 = c.getBlockMetadata(par2 & 0xF, par3, par4 & 0xF);
-		// Spout custom blocks end
+		// Spout End
 		double var7 = (double)((float)par2 + 0.5F);
 		double var9 = (double)((float)par3 + 0.7F);
 		double var11 = (double)((float)par4 + 0.5F);

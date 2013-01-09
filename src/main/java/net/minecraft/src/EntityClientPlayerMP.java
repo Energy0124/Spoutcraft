@@ -1,7 +1,6 @@
 package net.minecraft.src;
 
 import net.minecraft.client.Minecraft;
-
 // Spout Start
 import org.spoutcraft.client.SpoutClient;
 import org.spoutcraft.client.packet.PacketKeyPress;
@@ -99,16 +98,13 @@ public class EntityClientPlayerMP extends EntityPlayerSP {
 		double var7 = this.posZ - this.oldPosZ;
 		double var9 = (double)(this.rotationYaw - this.oldRotationYaw);
 		double var11 = (double)(this.rotationPitch - this.oldRotationPitch);
-		boolean var13 = var3 * var3 + var5 * var5 + var7 * var7 > 9.0E-4D || this.field_71168_co >= (this.isAirBorne ? 4 : 20); //Spout send more updates while airborne
+		// Spout Start - Send more updates while airborne.
+		boolean var13 = var3 * var3 + var5 * var5 + var7 * var7 > 9.0E-4D || this.field_71168_co >= (this.isAirBorne ? 4 : 20);
 		boolean var14 = var9 != 0.0D || var11 != 0.0D;
+		// Spout End
 
 		if (this.ridingEntity != null) {
-			if (var14) {
-				this.sendQueue.addToSendQueue(new Packet11PlayerPosition(this.motionX, -999.0D, -999.0D, this.motionZ, this.onGround));
-			} else {
-				this.sendQueue.addToSendQueue(new Packet13PlayerLookMove(this.motionX, -999.0D, -999.0D, this.motionZ, this.rotationYaw, this.rotationPitch, this.onGround));
-			}
-
+			this.sendQueue.addToSendQueue(new Packet13PlayerLookMove(this.motionX, -999.0D, -999.0D, this.motionZ, this.rotationYaw, this.rotationPitch, this.onGround));
 			var13 = false;
 		} else if (var13 && var14) {
 			this.sendQueue.addToSendQueue(new Packet13PlayerLookMove(this.posX, this.boundingBox.minY, this.posY, this.posZ, this.rotationYaw, this.rotationPitch, this.onGround));
@@ -116,7 +112,7 @@ public class EntityClientPlayerMP extends EntityPlayerSP {
 			this.sendQueue.addToSendQueue(new Packet11PlayerPosition(this.posX, this.boundingBox.minY, this.posY, this.posZ, this.onGround));
 		} else if (var14) {
 			this.sendQueue.addToSendQueue(new Packet12PlayerLook(this.rotationYaw, this.rotationPitch, this.onGround));
-		} else if (this.wasOnGround != this.onGround) {
+		} else {
 			this.sendQueue.addToSendQueue(new Packet10Flying(this.onGround));
 		}
 
@@ -140,8 +136,9 @@ public class EntityClientPlayerMP extends EntityPlayerSP {
 	/**
 	 * Called when player presses the drop item key
 	 */
-	public EntityItem dropOneItem() {
-		this.sendQueue.addToSendQueue(new Packet14BlockDig(4, 0, 0, 0, 0));
+	public EntityItem dropOneItem(boolean par1) {
+		int var2 = par1 ? 3 : 4;
+		this.sendQueue.addToSendQueue(new Packet14BlockDig(var2, 0, 0, 0, 0));
 		return null;
 	}
 
@@ -173,16 +170,23 @@ public class EntityClientPlayerMP extends EntityPlayerSP {
 	 * Deals damage to the entity. If its a EntityPlayer then will take damage from the armor first and then health second
 	 * with the reduced value. Args: damageAmount
 	 */
-	public void damageEntity(DamageSource par1DamageSource, int par2) { // Spout - public
-		this.setEntityHealth(this.getHealth() - par2);
-		GuiChat.interruptChat(); // Spout
+	// Spout Start - private to public
+	public void damageEntity(DamageSource par1DamageSource, int par2) {
+	// Spout End
+		if (!this.isEntityInvulnerable()) {
+			this.setEntityHealth(this.getHealth() - par2);
+		}
 	}
 
 	/**
 	 * sets current screen to null (used on escape buttons of GUIs)
 	 */
 	public void closeScreen() {
-		this.sendQueue.addToSendQueue(new Packet101CloseWindow(this.craftingInventory.windowId));
+		this.sendQueue.addToSendQueue(new Packet101CloseWindow(this.openContainer.windowId));
+		this.func_92015_f();
+	}
+
+	public void func_92015_f() {
 		this.inventory.setItemStack((ItemStack)null);
 		super.closeScreen();
 	}

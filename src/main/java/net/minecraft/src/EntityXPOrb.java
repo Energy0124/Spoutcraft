@@ -1,8 +1,6 @@
 package net.minecraft.src;
 
 // Spout Start
-import org.spoutcraft.client.entity.CraftExperienceOrb;
-import org.spoutcraft.api.Spoutcraft;
 import org.spoutcraft.api.material.CustomBlock;
 import org.spoutcraft.api.material.MaterialData;
 // Spout End
@@ -22,9 +20,15 @@ public class EntityXPOrb extends Entity {
 	private int xpOrbHealth = 5;
 
 	/** This is how much XP this orb has. */
-	public int xpValue; // Spout private -> public
-	private EntityPlayer field_80001_f;
-	private int field_80002_g;
+	// Spout Start - private to public
+	public int xpValue;
+	// Spout End
+
+	/** The closest EntityPlayer to this orb. */
+	private EntityPlayer closestPlayer;
+
+	/** Threshold color for tracking players */
+	private int xpTargetColor;
 
 	public EntityXPOrb(World par1World, double par2, double par4, double par6, int par8) {
 		super(par1World);
@@ -96,24 +100,24 @@ public class EntityXPOrb extends Entity {
 			this.motionY = 0.20000000298023224D;
 			this.motionX = (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F);
 			this.motionZ = (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F);
-			this.worldObj.playSoundAtEntity(this, "random.fizz", 0.4F, 2.0F + this.rand.nextFloat() * 0.4F);
+			this.playSound("random.fizz", 0.4F, 2.0F + this.rand.nextFloat() * 0.4F);
 		}
 
 		this.pushOutOfBlocks(this.posX, (this.boundingBox.minY + this.boundingBox.maxY) / 2.0D, this.posZ);
 		double var1 = 8.0D;
 
-		if (this.field_80002_g < this.xpColor - 20 + this.entityId % 100) {
-			if (this.field_80001_f == null || this.field_80001_f.getDistanceSqToEntity(this) > var1 * var1) {
-				this.field_80001_f = this.worldObj.getClosestPlayerToEntity(this, var1);
+		if (this.xpTargetColor < this.xpColor - 20 + this.entityId % 100) {
+			if (this.closestPlayer == null || this.closestPlayer.getDistanceSqToEntity(this) > var1 * var1) {
+				this.closestPlayer = this.worldObj.getClosestPlayerToEntity(this, var1);
 			}
 
-			this.field_80002_g = this.xpColor;
+			this.xpTargetColor = this.xpColor;
 		}
 
-		if (this.field_80001_f != null) {
-			double var3 = (this.field_80001_f.posX - this.posX) / var1;
-			double var5 = (this.field_80001_f.posY + (double)this.field_80001_f.getEyeHeight() - this.posY) / var1;
-			double var7 = (this.field_80001_f.posZ - this.posZ) / var1;
+		if (this.closestPlayer != null) {
+			double var3 = (this.closestPlayer.posX - this.posX) / var1;
+			double var5 = (this.closestPlayer.posY + (double)this.closestPlayer.getEyeHeight() - this.posY) / var1;
+			double var7 = (this.closestPlayer.posZ - this.posZ) / var1;
 			double var9 = Math.sqrt(var3 * var3 + var5 * var5 + var7 * var7);
 			double var11 = 1.0D - var9;
 
@@ -185,14 +189,18 @@ public class EntityXPOrb extends Entity {
 	 * Called when the entity is attacked.
 	 */
 	public boolean attackEntityFrom(DamageSource par1DamageSource, int par2) {
-		this.setBeenAttacked();
-		this.xpOrbHealth -= par2;
+		if (this.isEntityInvulnerable()) {
+			return false;
+		} else {
+			this.setBeenAttacked();
+			this.xpOrbHealth -= par2;
 
-		if (this.xpOrbHealth <= 0) {
-			this.setDead();
+			if (this.xpOrbHealth <= 0) {
+				this.setDead();
+			}
+
+			return false;
 		}
-
-		return false;
 	}
 
 	/**
@@ -220,7 +228,7 @@ public class EntityXPOrb extends Entity {
 		if (!this.worldObj.isRemote) {
 			if (this.field_70532_c == 0 && par1EntityPlayer.xpCooldown == 0) {
 				par1EntityPlayer.xpCooldown = 2;
-				this.worldObj.playSoundAtEntity(this, "random.orb", 0.1F, 0.5F * ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.8F));
+				this.playSound("random.orb", 0.1F, 0.5F * ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.8F));
 				par1EntityPlayer.onItemPickup(this, 1);
 				par1EntityPlayer.addExperience(this.xpValue);
 				this.setDead();

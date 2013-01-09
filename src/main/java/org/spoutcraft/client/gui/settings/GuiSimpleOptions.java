@@ -1,3 +1,22 @@
+/*
+ * This file is part of Spoutcraft.
+ *
+ * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Spoutcraft is licensed under the GNU Lesser General Public License.
+ *
+ * Spoutcraft is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Spoutcraft is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.spoutcraft.client.gui.settings;
 
 import net.minecraft.src.GuiScreen;
@@ -36,24 +55,24 @@ import org.spoutcraft.client.gui.settings.controls.SoundEffectsSlider;
 
 public class GuiSimpleOptions extends GuiScreen {
 	GuiScreen parent = null;
-	Button doneButton;
+	Button doneButton, chatButton;
 	GenericScrollArea scroll;
 	Label title;
 	CheckBox switchToAdvancedCheck;
-	
+
 	public static GuiScreen constructOptionsScreen(GuiScreen parent) {
 		return Configuration.isAdvancedOptions() ? new GuiAdvancedOptions(parent) : new GuiSimpleOptions(parent);
 	}
-	
+
 	public GuiSimpleOptions(GuiScreen parent) {
 		this.parent = parent;
 	}
-	
+
 	@Override
 	public void initGui() {
 		Control control;
 		Addon spoutcraft = Spoutcraft.getAddonManager().getAddon("Spoutcraft");
-		
+
 		GenericScrollArea screen = new GenericScrollArea();
 		scroll = screen;
 		screen.setHeight(height - 24 - 30).setWidth(width).setY(24).setX(0);
@@ -67,11 +86,12 @@ public class GuiSimpleOptions extends GuiScreen {
 
 		int left = (int)(width / 2  - 155);
 		int right = (int)(width / 2 + 5);
+		int center = (int)(width / 2 - 80);
 
 		control = new ResetButton(parent).setAlign(WidgetAnchor.TOP_CENTER);
 		control.setWidth(150).setHeight(20).setX(left).setY(height - 25);
 		getScreen().attachWidget(spoutcraft, control);
-		
+
 		switchToAdvancedCheck = new GenericCheckBox("Advanced");
 		switchToAdvancedCheck.setChecked(false);
 		switchToAdvancedCheck.setX(5).setY(3).setWidth(100).setHeight(20);
@@ -87,7 +107,7 @@ public class GuiSimpleOptions extends GuiScreen {
 		int top = 5;
 
 		Color grey = new Color(0.80F, 0.80F, 0.80F, 0.65F);
-		
+
 		label = new GenericLabel("Controls and Audio Settings");
 		size = Spoutcraft.getMinecraftFont().getTextWidth(label.getText());
 		label.setX((int) (width / 2 - size / 2)).setY(top);
@@ -194,13 +214,13 @@ public class GuiSimpleOptions extends GuiScreen {
 		top += 22;
 		// TODO add option controls to the scroll area
 	}
-	
+
 	@Override
 	public void drawScreen(int par1, int par2, float par3) {
 		drawDefaultBackground();
 		super.drawScreen(par1, par2, par3);
 	}
-	
+
 	@Override
 	protected void buttonClicked(Button btn) {
 		if (btn == doneButton) {

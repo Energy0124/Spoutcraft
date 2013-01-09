@@ -1,23 +1,11 @@
 package net.minecraft.src;
 
 public class ColorizerWater {
+	// MCPatcher Start - private to public
+	public static int[] waterBuffer = new int[65536];
+	// MCPatcher End
 
-	public static int[] waterBuffer = new int[65536]; // Spout HD private -> public
-
-	// Spout Start
-	public ColorizerWater() {
-	}
-
-	public static int getWaterColor(double d, double d1) {
-		d1 *= d;
-		int i = (int) ((1.0D - d) * 255D);
-		int j = (int) ((1.0D - d1) * 255D);
-		return waterBuffer[j << 8 | i];
-	}
-	// Spout End
-	
 	public static void setWaterBiomeColorizer(int[] par0ArrayOfInteger) {
 		waterBuffer = par0ArrayOfInteger;
 	}
-
 }

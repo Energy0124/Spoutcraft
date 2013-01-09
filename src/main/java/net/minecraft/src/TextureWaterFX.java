@@ -1,32 +1,41 @@
 package net.minecraft.src;
 
-import com.pclewis.mcpatcher.mod.TileSize; // Spout HD 
+// MCPatcher Start
+import com.pclewis.mcpatcher.mod.TileSize;
+// MCPatcher End
 
 public class TextureWaterFX extends TextureFX {
-	// Spout HD Start
+
 	/** red RGB value for water texture */
+	// MCPatcher Start
 	protected float[] red;
+	// MCPatcher End
 
 	/** green RGB value for water texture */
+	// MCPatcher Sstart
 	protected float[] green;
+	// MCPatcher End
 
 	/** blue RGB value for water texture */
+	// MCPatcher Start
 	protected float[] blue;
+	// MCPatcher End
 
 	/** alpha RGB value for water texture */
+	// MCPatcher Start
 	protected float[] alpha;
 	private int tickCounter;
-	// Spout HD End
+	// MCPatcher End
 
 	public TextureWaterFX() {
 		super(Block.waterMoving.blockIndexInTexture);
-		// Spout HD Start
+		 // MCPatcher Start
 		this.red = new float[TileSize.int_numPixels];
 		this.green = new float[TileSize.int_numPixels];
 		this.blue = new float[TileSize.int_numPixels];
 		this.alpha = new float[TileSize.int_numPixels];
 		this.tickCounter = 0;
-		// Spout HD End
+		 // MCPatcher End
 	}
 
 	public void onTick() {
@@ -36,24 +45,28 @@ public class TextureWaterFX extends TextureFX {
 		float var3;
 		int var5;
 		int var6;
-		// Spout HD Start
+
+		 // MCPatcher Start
 		for (var1 = 0; var1 < TileSize.int_size; ++var1) {
 			for (var2 = 0; var2 < TileSize.int_size; ++var2) {
-				// Spout HD End
+			// MCPatcher End
 				var3 = 0.0F;
 
 				for (int var4 = var1 - 1; var4 <= var1 + 1; ++var4) {
-					// Spout HD Start
+					// MCPatcher Start
 					var5 = var4 & TileSize.int_sizeMinus1;
 					var6 = var2 & TileSize.int_sizeMinus1;
 					var3 += this.red[var5 + var6 * TileSize.int_size];
-					// Spout HD End
+					// MCPatcher End
 				}
 
-				this.green[var1 + var2 * TileSize.int_size] = var3 / 3.3F + this.blue[var1 + var2 * TileSize.int_size] * 0.8F; // Spout HD 
+				// MCPatcher Start
+				this.green[var1 + var2 * TileSize.int_size] = var3 / 3.3F + this.blue[var1 + var2 * TileSize.int_size] * 0.8F;
+				// MCPatcher End
 			}
 		}
-		// Spout HD Start
+
+		// MCPatcher Start
 		for (var1 = 0; var1 < TileSize.int_size; ++var1) {
 			for (var2 = 0; var2 < TileSize.int_size; ++var2) {
 				this.blue[var1 + var2 * TileSize.int_size] += this.alpha[var1 + var2 * TileSize.int_size] * 0.05F;
@@ -63,10 +76,12 @@ public class TextureWaterFX extends TextureFX {
 				}
 
 				this.alpha[var1 + var2 * TileSize.int_size] -= 0.1F;
+				// MCPatcher End
 
 				if (Math.random() < 0.05D) {
+					// MCPatcher Start
 					this.alpha[var1 + var2 * TileSize.int_size] = 0.5F;
-					// Spout HD End
+					// MCPatcher End
 				}
 			}
 		}
@@ -75,7 +90,9 @@ public class TextureWaterFX extends TextureFX {
 		this.green = this.red;
 		this.red = var12;
 
-		for (var2 = 0; var2 < TileSize.int_numPixels; ++var2) { // Spout HD 
+		// MCPatcher Start
+		for (var2 = 0; var2 < TileSize.int_numPixels; ++var2) {
+		// MCPatcher End
 			var3 = this.red[var2];
 
 			if (var3 > 1.0F) {

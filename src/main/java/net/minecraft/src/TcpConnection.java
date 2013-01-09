@@ -4,6 +4,7 @@ import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
@@ -14,10 +15,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.crypto.SecretKey;
-
+//Spout Start
 import org.spoutcraft.client.chunkcache.ChunkNetCache;
+//Spout End
 
-public class TcpConnection implements NetworkManager {
+public class TcpConnection implements INetworkManager {
 	public static AtomicInteger field_74471_a = new AtomicInteger();
 	public static AtomicInteger field_74469_b = new AtomicInteger();
 
@@ -85,7 +87,11 @@ public class TcpConnection implements NetworkManager {
 	boolean isOutputEncrypted;
 	private SecretKey sharedKeyForEncryption;
 	private PrivateKey field_74463_A;
-	private int field_74464_B;
+
+	/**
+	 * Delay for sending pending chunk data packets (as opposed to pending non-chunk data packets)
+	 */
+	private int chunkDataPacketsDelay;
 
 	public TcpConnection(Socket par1Socket, String par2Str, NetHandler par3NetHandler) throws IOException {
 		this(par1Socket, par2Str, par3NetHandler, (PrivateKey)null);
@@ -107,7 +113,7 @@ public class TcpConnection implements NetworkManager {
 		this.isOutputEncrypted = false;
 		this.sharedKeyForEncryption = null;
 		this.field_74463_A = null;
-		this.field_74464_B = 50;
+		this.chunkDataPacketsDelay = 50;
 		this.field_74463_A = par4PrivateKey;
 		this.networkSocket = par1Socket;
 		this.remoteSocketAddress = par1Socket.getRemoteSocketAddress();
@@ -119,10 +125,10 @@ public class TcpConnection implements NetworkManager {
 		} catch (SocketException var6) {
 			System.err.println(var6.getMessage());
 		}
-		
-		// Spout - start
+
+		// Spout Start
 		ChunkNetCache.reset();
-		// Spout - end
+		// Spout End
 
 		this.socketInputStream = new DataInputStream(par1Socket.getInputStream());
 		this.socketOutputStream = new DataOutputStream(new BufferedOutputStream(par1Socket.getOutputStream(), 5120));
@@ -138,6 +144,9 @@ public class TcpConnection implements NetworkManager {
 		this.readThread = null;
 	}
 
+	/**
+	 * Sets the NetHandler for this NetworkManager. Server-only.
+	 */
 	public void setNetHandler(NetHandler par1NetHandler) {
 		this.theNetHandler = par1NetHandler;
 	}
@@ -151,12 +160,7 @@ public class TcpConnection implements NetworkManager {
 
 			synchronized (this.sendQueueLock) {
 				this.sendQueueByteLength += par1Packet.getPacketSize() + 1;
-
-				if (par1Packet.isChunkDataPacket) {
-					this.chunkDataPackets.add(par1Packet);
-				} else {
-					this.dataPackets.add(par1Packet);
-				}
+				this.dataPackets.add(par1Packet);
 			}
 		}
 	}
@@ -173,19 +177,19 @@ public class TcpConnection implements NetworkManager {
 			int var10001;
 			int[] var10000;
 
-			if (this.field_74468_e == 0 || System.currentTimeMillis() - ((Packet)this.dataPackets.get(0)).creationTimeMillis >= (long)this.field_74468_e) {
+			if (this.field_74468_e == 0 || !this.dataPackets.isEmpty() && System.currentTimeMillis() - ((Packet)this.dataPackets.get(0)).creationTimeMillis >= (long)this.field_74468_e) {
 				var2 = this.func_74460_a(false);
 
 				if (var2 != null) {
 					Packet.writePacket(var2, this.socketOutputStream);
-					
-					// Spout - start
+
+					// Spout Start
 					ChunkNetCache.totalPacketUp.addAndGet(var2.getPacketSize());
-					// Spout - end
+					// Spout End
 
 					if (var2 instanceof Packet252SharedKey && !this.isOutputEncrypted) {
 						if (!this.theNetHandler.isServerHandler()) {
-							this.sharedKeyForEncryption = ((Packet252SharedKey)var2).func_73304_d();
+							this.sharedKeyForEncryption = ((Packet252SharedKey)var2).getSharedKey();
 						}
 
 						this.encryptOuputStream();
@@ -198,7 +202,7 @@ public class TcpConnection implements NetworkManager {
 				}
 			}
 
-			if (this.field_74464_B-- <= 0 && (this.field_74468_e == 0 || System.currentTimeMillis() - ((Packet)this.chunkDataPackets.get(0)).creationTimeMillis >= (long)this.field_74468_e)) {
+			if (this.chunkDataPacketsDelay-- <= 0 && (this.field_74468_e == 0 || !this.chunkDataPackets.isEmpty() && System.currentTimeMillis() - ((Packet)this.chunkDataPackets.get(0)).creationTimeMillis >= (long)this.field_74468_e)) {
 				var2 = this.func_74460_a(true);
 
 				if (var2 != null) {
@@ -206,7 +210,7 @@ public class TcpConnection implements NetworkManager {
 					var10000 = field_74467_d;
 					var10001 = var2.getPacketId();
 					var10000[var10001] += var2.getPacketSize() + 1;
-					this.field_74464_B = 0;
+					this.chunkDataPacketsDelay = 0;
 					var1 = true;
 				}
 			}
@@ -281,17 +285,17 @@ public class TcpConnection implements NetworkManager {
 		boolean var1 = false;
 
 		try {
-			// Spout - start
+			// Spout Start
 			if (this.isTerminating) {
 				return false;
 			}
-			// Spout - end
-			Packet var2 = Packet.readPacket(this.socketInputStream, this.theNetHandler.isServerHandler());
+			// Spout End
+			Packet var2 = Packet.readPacket(this.socketInputStream, this.theNetHandler.isServerHandler(), this.networkSocket);
 
 			if (var2 != null) {
 				if (var2 instanceof Packet252SharedKey && !this.isInputBeingDecrypted) {
 					if (this.theNetHandler.isServerHandler()) {
-						this.sharedKeyForEncryption = ((Packet252SharedKey)var2).func_73303_a(this.field_74463_A);
+						this.sharedKeyForEncryption = ((Packet252SharedKey)var2).getSharedKey(this.field_74463_A);
 					}
 
 					this.decryptInputStream();
@@ -302,7 +306,7 @@ public class TcpConnection implements NetworkManager {
 				var10000[var10001] += var2.getPacketSize() + 1;
 
 				if (!this.isServerTerminating) {
-					if (var2.isWritePacket() && this.theNetHandler.canProcessPackets()) {
+					if (var2.canProcessAsync() && this.theNetHandler.canProcessPacketsAsync()) {
 						this.field_74490_x = 0;
 						var2.processPacket(this.theNetHandler);
 					} else {
@@ -347,14 +351,25 @@ public class TcpConnection implements NetworkManager {
 
 			try {
 				this.socketInputStream.close();
-				this.socketInputStream = null;
+			} catch (Throwable var6) {
+				;
+			}
+
+			try {
 				this.socketOutputStream.close();
-				this.socketOutputStream = null;
+			} catch (Throwable var5) {
+				;
+			}
+
+			try {
 				this.networkSocket.close();
-				this.networkSocket = null;
 			} catch (Throwable var4) {
 				;
 			}
+
+			this.socketInputStream = null;
+			this.socketOutputStream = null;
+			this.networkSocket = null;
 		}
 	}
 
@@ -378,9 +393,9 @@ public class TcpConnection implements NetworkManager {
 
 		while (!this.readPackets.isEmpty() && var1-- >= 0) {
 			Packet var2 = (Packet)this.readPackets.remove(0);
-			// Spout - start
+			// Spout Start
 			ChunkNetCache.totalPacketDown.addAndGet(var2.getPacketSize());
-			// Spout - end
+			// Spout End
 			var2.processPacket(this.theNetHandler);
 		}
 
@@ -412,7 +427,8 @@ public class TcpConnection implements NetworkManager {
 
 	private void decryptInputStream() throws IOException {
 		this.isInputBeingDecrypted = true;
-		this.socketInputStream = new DataInputStream(CryptManager.decryptInputStream(this.sharedKeyForEncryption, this.networkSocket.getInputStream()));
+		InputStream var1 = this.networkSocket.getInputStream();
+		this.socketInputStream = new DataInputStream(CryptManager.decryptInputStream(this.sharedKeyForEncryption, var1));
 	}
 
 	/**
@@ -421,7 +437,8 @@ public class TcpConnection implements NetworkManager {
 	private void encryptOuputStream() throws IOException {
 		this.socketOutputStream.flush();
 		this.isOutputEncrypted = true;
-		this.socketOutputStream = new DataOutputStream(new BufferedOutputStream(CryptManager.encryptOuputStream(this.sharedKeyForEncryption, this.networkSocket.getOutputStream()), 5120));
+		BufferedOutputStream var1 = new BufferedOutputStream(CryptManager.encryptOuputStream(this.sharedKeyForEncryption, this.networkSocket.getOutputStream()), 5120);
+		this.socketOutputStream = new DataOutputStream(var1);
 	}
 
 	/**

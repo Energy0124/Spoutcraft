@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -7,20 +6,20 @@
 	<name>Spoutcraft</name>
 	<groupId>org.spoutcraft</groupId>
 	<artifactId>spoutcraft</artifactId>
-	<version>1.3.2-SNAPSHOT</version>
+	<version>1.4.7-SNAPSHOT</version>
 	<url>http://www.spout.org</url>
 	<inceptionYear>2011</inceptionYear>
-	<description>Spoutcraft is a modified version of the Minecraft client, which you can access through the the Spoutcraft Launcher, 
-	and when connecting to a server with SpoutPlugin, it allows you to unlock most of the features of SpoutPlugin, such as custom blocks, 
-	items, texture packs, etc. It also gives several speed improvements, a minimap, an overview map, custom shaders, etc.</description>
+	<description>Spoutcraft is a modified Minecraft client, which is accessible via the Spoutcraft Launcher, that boosts increased FPS, HD textures/fonts,
+	minimap, and an overview map. When connecting to a server with SpoutPlugin, custom blocks and items, custom guis, custom sounds, etc are
+	all available for use. Spoutcraft is a legacy project and will be replaced by the Spout client when finished.</description>
 
 	<!-- Build properties -->
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<currentYear>2012</currentYear>
-		<minecraftVersion>1.3.2</minecraftVersion>
+		<minecraftVersion>1.4.7</minecraftVersion>
 		<lwjglVersion>2.4</lwjglVersion>
-		<mcpVersion>72</mcpVersion>
+		<mcpVersion>726</mcpVersion>
 		<buildNumber>0</buildNumber>
 	</properties>
 
@@ -55,7 +54,7 @@
 	<!-- Issue tracker -->
 	<issueManagement>
 		<system>jira</system>
-		<url>http://issues.spout.org/browse/Spoutcraft</url>
+		<url>http://issues.spout.org/browse/SPOUTCRAFT</url>
 	</issueManagement>
 
 	<!-- Dependency repositories -->
@@ -92,12 +91,13 @@
 		</snapshotRepository>
 	</distributionManagement>
 
-	<!-- Build settings -->
+	<!-- Build configuration -->
 	<build>
 		<defaultGoal>clean install</defaultGoal>
 
-		<!-- Static resources -->
+		<!-- Resources to include -->
 		<resources>
+			<!-- Static resources -->
 			<resource>
 				<filtering>false</filtering>
 				<targetPath>.</targetPath>
@@ -196,18 +196,11 @@
 									<targetPath>${project.basedir}/jars/bin</targetPath>
 									<destFileName>minecraft.jar</destFileName>
 									<file>http://s3.amazonaws.com/MinecraftDownload/minecraft.jar</file>
-									<!-- TODO: Implement byte patching to downgrade jar to required version if needed -->
 								</resource>
 								<!-- Download remaining dependencies -->
 								<resource>
 									<targetPath>${project.basedir}/lib</targetPath>
 									<dependencies>
-										<dependency>
-											<groupId>net.minecraft</groupId>
-											<artifactId>lwjgl</artifactId>
-											<version>${lwjglVersion}</version>
-											<stripVersion>true</stripVersion>
-										</dependency>
 										<dependency>
 											<groupId>de.cuina.fireandfuel</groupId>
 											<artifactId>codecjlayermp3</artifactId>
@@ -251,6 +244,12 @@
 											<stripVersion>true</stripVersion>
 										</dependency>
 										<dependency>
+											<groupId>net.minecraft</groupId>
+											<artifactId>lwjgl</artifactId>
+											<version>${lwjglVersion}</version>
+											<stripVersion>true</stripVersion>
+										</dependency>
+										<dependency>
 											<groupId>slick</groupId>
 											<artifactId>slick</artifactId>
 											<version>274</version>
@@ -276,6 +275,12 @@
 									<dependencies>
 										<dependency>
 											<groupId>net.minecraft</groupId>
+											<artifactId>jinput</artifactId>
+											<version>1.0.0-b01</version>
+											<stripVersion>true</stripVersion>
+										</dependency>
+										<dependency>
+											<groupId>net.minecraft</groupId>
 											<artifactId>lwjgl</artifactId>
 											<version>${lwjglVersion}</version>
 											<stripVersion>true</stripVersion>
@@ -284,12 +289,6 @@
 											<groupId>net.minecraft</groupId>
 											<artifactId>lwjgl_util</artifactId>
 											<version>${lwjglVersion}</version>
-											<stripVersion>true</stripVersion>
-										</dependency>
-										<dependency>
-											<groupId>net.minecraft</groupId>
-											<artifactId>jinput</artifactId>
-											<version>1.0.0-b01</version>
 											<stripVersion>true</stripVersion>
 										</dependency>
 									</dependencies>
@@ -533,11 +532,11 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- Version strip plugin -->
+			<!-- Release version plugin -->
 			<plugin>
 				<groupId>com.sourcesense.maven</groupId>
 				<artifactId>maven-nosnapshot-plugin</artifactId>
-				<version>0.0.7-SNAPSHOT</version>
+				<version>0.0.7</version>
 				<executions>
 					<execution>
 						<configuration>
@@ -562,22 +561,6 @@
 					</excludes>
 				</configuration>
 			</plugin>
-			<!-- Javadoc generation plugin -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.9</version>
-				<configuration>
-					<bottom><![CDATA[Copyright (c) {inceptionYear}-{currentYear}, <a href="${project.organization.url}" target="_blank">${project.organization.name}</a>. ${project.name} is licensed under <a href="http://www.gnu.org/licenses/lgpl.html" target="_blank">GNU Lesser General Public License Version 3</a>]]></bottom>
-					<doctitle><![CDATA[${project.name} ${releaseVersion} b${buildNumber} - ${maven.build.timestamp}]]></doctitle>
-					<windowtitle>Javadoc | ${project.name} ${releaseVersion} b${buildNumber}</windowtitle>
-					<author>false</author>
-					<version>false</version>
-					<detectLinks>true</detectLinks>
-					<linksource>true</linksource>
-					<sourcepath>${project.basedir}/src/main/java/org/spoutcraft/api</sourcepath>
-				</configuration>
-			</plugin>
 		</plugins>
 
 		<!-- Plugin management -->
@@ -593,15 +576,41 @@
 							<pluginExecutions>
 								<pluginExecution>
 									<pluginExecutionFilter>
-										<groupId>com.sourcesense.maven</groupId>
-										<artifactId>maven-nosnapshot-plugin</artifactId>
-										<versionRange>[0.0.7-SNAPSHOT,)</versionRange>
+										<groupId>com.github.goldin</groupId>
+										<artifactId>copy-maven-plugin</artifactId>
+										<versionRange>[0.2.5,)</versionRange>
 										<goals>
 											<goal>strip</goal>
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore />
+										<execute/>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.codehaus.mojo</groupId>
+										<artifactId>exec-maven-plugin</artifactId>
+										<versionRange>[1.2.5,)</versionRange>
+										<goals>
+											<goal>strip</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute/>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>com.sourcesense.maven</groupId>
+										<artifactId>maven-nosnapshot-plugin</artifactId>
+										<versionRange>[0.0.7,)</versionRange>
+										<goals>
+											<goal>strip</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute/>
 									</action>
 								</pluginExecution>
 							</pluginExecutions>

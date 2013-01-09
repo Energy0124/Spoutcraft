@@ -93,7 +93,6 @@ import org.spoutcraft.client.packet.CustomPacket;
 import org.spoutcraft.client.packet.PacketAddonData;
 import org.spoutcraft.client.packet.PacketEntityInformation;
 import org.spoutcraft.client.packet.PacketManager;
-import org.spoutcraft.client.player.ChatManager;
 import org.spoutcraft.client.player.ClientPlayer;
 import org.spoutcraft.client.player.SimpleBiomeManager;
 import org.spoutcraft.client.player.SimpleSkyManager;
@@ -104,7 +103,6 @@ public class SpoutClient extends PropertyObject implements Client {
 	private static final String version = "Unknown Version";
 
 	private final SimpleSkyManager skyManager = new SimpleSkyManager();
-	private final ChatManager chatManager = new ChatManager();
 	private final PacketManager packetManager = new PacketManager();
 	private final BiomeManager biomeManager = new SimpleBiomeManager();
 	private final MaterialManager materialManager = new SimpleMaterialManager();
@@ -153,7 +151,6 @@ public class SpoutClient extends PropertyObject implements Client {
 		((SimpleKeyBindingManager)bindingManager).load();
 		addonStore.load();
 		serverManager.init();
-		chatManager.load();
 		Log.setVerbose(false);
 		Log.setLogSystem(new SilencedLogSystem());
 	}
@@ -182,7 +179,6 @@ public class SpoutClient extends PropertyObject implements Client {
 		Keyboard.setKeyManager(new SimpleKeyManager());
 		CraftEntity.registerTypes();
 		FileUtil.migrateOldFiles();
-		new File(Minecraft.getMinecraftDir(), "shaders").mkdir();
 	}
 
 	public static SpoutClient getInstance() {
@@ -229,10 +225,6 @@ public class SpoutClient extends PropertyObject implements Client {
 
 	public SkyManager getSkyManager() {
 		return skyManager;
-	}
-
-	public ChatManager getChatManager() {
-		return chatManager;
 	}
 
 	public PacketManager getPacketManager() {
@@ -367,8 +359,8 @@ public class SpoutClient extends PropertyObject implements Client {
 			Iterator<Entity> i = Entity.toProcess.iterator();
 			while (i.hasNext()) {
 				Entity next = i.next();
-				if (next.spoutEntity != null) {
-					processed.add(next.spoutEntity);
+				if (next.spoutEnty != null) {
+					processed.add(next.spoutEnty);
 				}
 			}
 			Entity.toProcess.clear();
@@ -411,7 +403,7 @@ public class SpoutClient extends PropertyObject implements Client {
 		if (player == null) {
 			player = ClientPlayer.getInstance();
 			player.setPlayer(getHandle().thePlayer);
-			getHandle().thePlayer.spoutEntity = player;
+			getHandle().thePlayer.spoutEnty = player;
 		}
 		if (player.getHandle() instanceof EntityClientPlayerMP && isSpoutEnabled()) {
 			clipboardThread = new ClipboardThread((EntityClientPlayerMP)player.getHandle());
@@ -423,6 +415,7 @@ public class SpoutClient extends PropertyObject implements Client {
 		SpoutcraftChunk.loadedChunks.clear();
 		PacketDecompressionThread.startThread();
 		MipMapUtils.initializeMipMaps();
+		MipMapUtils.update();
 		player.getMainScreen().toggleSurvivalHUD(!Minecraft.theMinecraft.playerController.isInCreativeMode());
 		inWorldTicks = 0L;
 		MinimapConfig.getInstance().getServerWaypoints().clear();
@@ -507,34 +500,34 @@ public class SpoutClient extends PropertyObject implements Client {
 		if (!isCameraDetached())
 			return null;
 
-		return (CameraEntity)getHandle().renderViewEntity.spoutEntity;
+		return (CameraEntity)getHandle().renderViewEntity.spoutEnty;
 	}
 
 	public void setCamera(FixedLocation pos) {
 		EntityLiving cam = SpoutClient.getHandle().renderViewEntity;
-		if (!(cam.spoutEntity instanceof CameraEntity))
+		if (!(cam.spoutEnty instanceof CameraEntity))
 			return;
 
-		((CameraEntity)cam.spoutEntity).teleport(pos);
+		((CameraEntity)cam.spoutEnty).teleport(pos);
 	}
 
 	public void detachCamera(boolean detach) {
 		if (detach) {
-			if (getHandle().renderViewEntity.spoutEntity instanceof CameraEntity) {
+			if (getHandle().renderViewEntity.spoutEnty instanceof CameraEntity) {
 				setCamera(getActivePlayer().getLocation());
 				return;
 			}
 			getHandle().renderViewEntity = (new CraftCameraEntity(getActivePlayer().getLocation())).getHandle();
 		} else {
-			if (getHandle().renderViewEntity.spoutEntity instanceof CameraEntity) {
-				getHandle().renderViewEntity.spoutEntity.remove();
+			if (getHandle().renderViewEntity.spoutEnty instanceof CameraEntity) {
+				getHandle().renderViewEntity.spoutEnty.remove();
 				getHandle().renderViewEntity = getHandle().thePlayer;
 			}
 		}
 	}
 
 	public boolean isCameraDetached() {
-		return getHandle().renderViewEntity.spoutEntity instanceof CameraEntity;
+		return getHandle().renderViewEntity.spoutEnty instanceof CameraEntity;
 	}
 
 	public void enableAddons(AddonLoadOrder load) {

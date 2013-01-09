@@ -181,8 +181,7 @@ public class GuiServerInfo extends GuiSpoutScreen {
 		labelSpoutcraft = new GenericLabel("...");
 		labelSpoutcraft.setTextColor(new Color(0xffaaaaaa));
 		content.attachWidget(spoutcraft, labelSpoutcraft);
-
-		textureIcon = new GenericTexture("http://static.spout.org/server/thumb/" + item.getDatabaseId() + ".png");
+		textureIcon = new GenericTexture("http://cdn.spout.org/server/thumb/" + item.getDatabaseId() + ".png");
 		textureIcon.setFinishDelegate(new ImageUpdate());
 		textureIcon.setWidth(48).setHeight(48);
 		content.attachWidget(spoutcraft, textureIcon);
@@ -232,7 +231,7 @@ public class GuiServerInfo extends GuiSpoutScreen {
 			labelGalleryImageDesc.recalculateLines();
 			content.updateInnerSize();
 		}
-		textureGalleryImage.setUrl("http://static.spout.org/server/gallery/" + item.getDatabaseId() + "_" + image.getHash() + ".png");
+		textureGalleryImage.setUrl("http://cdn.spout.org/server/gallery/" + item.getDatabaseId() + "_" + image.getHash() + ".png");
 		textureGalleryImage.setFinishDelegate(new ImageUpdate());
 		if (n == 0) {
 			buttonGalleryPrev.setEnabled(false);
@@ -445,7 +444,7 @@ public class GuiServerInfo extends GuiSpoutScreen {
 					List<Map<String, String>> gMap = (List<Map<String, String>>) i.get("gallery");
 					gallery.clear();
 					for (Map<String, String> image:gMap) {
-						GalleryImage img = new GalleryImage(image.get("picid"), URLDecoder.decode(image.get("title")), URLDecoder.decode(image.get("desc")));
+						GalleryImage img = new GalleryImage(image.get("picid"), URLDecoder.decode((String) image.get("title"), "UTF-8"), URLDecoder.decode((String) image.get("desc"), "UTF-8"));
 						gallery.add(img);
 					}
 					if (buttonGalleryNext == null) {

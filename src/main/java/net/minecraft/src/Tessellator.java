@@ -1,8 +1,5 @@
 package net.minecraft.src;
 
-import com.pclewis.mcpatcher.mod.Shaders;
-import com.pclewis.mcpatcher.mod.SuperTessellator;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -11,11 +8,14 @@ import java.nio.ShortBuffer;
 import org.lwjgl.opengl.ARBVertexBufferObject;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GLContext;
+// MCPatcher Start
+import com.pclewis.mcpatcher.mod.SuperTessellator;
+// MCPatcher End
 
 public class Tessellator {
 
 	/**
-	 * Boolean used to check whether quads should be drawn as four triangles. Initialized to true and never changed.
+	 * Boolean used to check whether quads should be drawn as two triangles. Initialized to false and never changed.
 	 */
 	private static boolean convertQuadsToTriangles = false;
 
@@ -42,7 +42,9 @@ public class Tessellator {
 	/**
 	 * The number of vertices to be drawn in the next draw call. Reset to 0 between draw calls.
 	 */
-	public int vertexCount = 0; // Spout HD private -> public
+	// MCPatcher Start - private to public
+	public int vertexCount = 0;
+	// MCPatcher End
 
 	/** The first coordinate to be used for the texture. */
 	private double textureU;
@@ -71,19 +73,25 @@ public class Tessellator {
 	private boolean hasNormals = false;
 
 	/** The index into the raw buffer to be used for the next data. */
-	public int rawBufferIndex = 0; // Spout HD private -> public
+	// MCPatcher Start - private to public
+	public int rawBufferIndex = 0;
+	// MCPatcher End
 
 	/**
 	 * The number of vertices manually added to the given draw call. This differs from vertexCount because it adds extra
 	 * vertices when converting quads to triangles.
 	 */
-	public int addedVertices = 0; // Spout HD private -> public
+	// MCPatcher Start - private to public
+	public int addedVertices = 0;
+	// MCPatcher End
 
 	/** Disables all color information for the following draw call. */
-	private boolean isColorDisabled = false; 
+	private boolean isColorDisabled = false;
 
 	/** The draw mode currently being used by the tessellator. */
-	public int drawMode; // Spout HD private -> public
+	// MCPatcher Start - private to public
+	public int drawMode;
+	// MCPatcher End
 
 	/**
 	 * An offset to be applied along the x-axis for all vertices in this draw call.
@@ -104,10 +112,14 @@ public class Tessellator {
 	private int normal;
 
 	/** The static instance of the Tessellator. */
-	public static final Tessellator instance = new SuperTessellator(2097152); // Spout HD Tessellator -> SuperTessellator
+	// MCPatcher Start
+	public static final Tessellator instance = new SuperTessellator(2097152);
+	// MCPatcher End
 
 	/** Whether this tessellator is currently in draw mode. */
-	public boolean isDrawing = false;  // Spout HD private -> public
+	// MCPatcher Start - private to public
+	public boolean isDrawing = false;
+	// MCPatcher End
 
 	/** Whether we are currently using VBO or not. */
 	private boolean useVBO = false;
@@ -125,15 +137,12 @@ public class Tessellator {
 	private int vboCount = 10;
 
 	/** The size of the buffers used (in integers). */
-	public int bufferSize; // Spout HD private -> public
-	// Spout Start
-	public int texture = -1;
-	private ByteBuffer shadersBuffer;
-	private ShortBuffer shadersShortBuffer;
-	private short[] shadersData;
-	// Spout End
+	// MCPatcher Start - private to public
+	public int bufferSize;
+	public int texture;
 
-	public Tessellator(int par1) { // Spout HD private -> public
+	public Tessellator(int par1) {
+	// MCPatcher End
 		this.bufferSize = par1;
 		this.byteBuffer = GLAllocation.createDirectByteBuffer(par1 * 4);
 		this.intBuffer = this.byteBuffer.asIntBuffer();
@@ -146,11 +155,10 @@ public class Tessellator {
 			this.vertexBuffers = GLAllocation.createDirectIntBuffer(this.vboCount);
 			ARBVertexBufferObject.glGenBuffersARB(this.vertexBuffers);
 		}
-		// Spout shaders start
-		this.shadersData = new short[]{(short)-1, (short)0};
-		this.shadersBuffer = GLAllocation.createDirectByteBuffer(par1 / 8 * 4);
-		this.shadersShortBuffer = this.shadersBuffer.asShortBuffer();
-		// Spout End
+
+		// MCPatcher Start
+		this.texture = -1;
+		// MCPatcher End
 	}
 
 	/**
@@ -163,11 +171,12 @@ public class Tessellator {
 			this.isDrawing = false;
 
 			if (this.vertexCount > 0) {
-				// Spout HD start
+				// MCPatcher Start
 				if (this.texture >= 0) {
 					GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.texture);
 				}
-				// Spout HD End
+				// MCPatcher End
+
 				this.intBuffer.clear();
 				this.intBuffer.put(this.rawBuffer, 0, this.rawBufferIndex);
 				this.byteBuffer.position(0);
@@ -236,9 +245,9 @@ public class Tessellator {
 				GL11.glEnableClientState(GL11.GL_VERTEX_ARRAY);
 
 				if (this.drawMode == 7 && convertQuadsToTriangles) {
-					Shaders.glDrawArraysWrapper(GL11.GL_TRIANGLES, 0, this.vertexCount, shadersShortBuffer); // Spout
+					GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, this.vertexCount);
 				} else {
-					Shaders.glDrawArraysWrapper(this.drawMode, 0, this.vertexCount, shadersShortBuffer); // Spout
+					GL11.glDrawArrays(this.drawMode, 0, this.vertexCount);
 				}
 
 				GL11.glDisableClientState(GL11.GL_VERTEX_ARRAY);
@@ -271,21 +280,14 @@ public class Tessellator {
 	/**
 	 * Clears the tessellator state in preparation for new drawing.
 	 */
-	public void reset() { //Spout HD private -> public
-		this.shadersBuffer.clear(); // Spout
+	// MCPatcher Start - private to public
+	public void reset() {
+	// MCPatcher End
 		this.vertexCount = 0;
 		this.byteBuffer.clear();
 		this.rawBufferIndex = 0;
 		this.addedVertices = 0;
 	}
-	
-	// Spout Start
-	public void setEntity(int var1) {
-		if (Shaders.entityAttrib >= 0) {
-			this.shadersData[0] = (short)var1;
-		}
-	}
-	// Spout End
 
 	/**
 	 * Sets draw mode in the tessellator to draw quads.
@@ -406,18 +408,6 @@ public class Tessellator {
 	 * Adds a vertex with the specified x,y,z to the current draw call. It will trigger a draw() if the buffer gets full.
 	 */
 	public void addVertex(double par1, double par3, double par5) {
-		// Spout Start
-		if(Shaders.isEnabled()) {
-			if(this.drawMode == 7 && convertQuadsToTriangles && (addedVertices+1)%4==0&&hasNormals) {
-				this.rawBuffer[this.rawBufferIndex + 6] = this.rawBuffer[this.rawBufferIndex + -18];
-				this.shadersBuffer.putShort(this.shadersData[0]).putShort(this.shadersData[1]);
-				this.rawBuffer[this.rawBufferIndex + 14] = this.rawBuffer[this.rawBufferIndex + -2];
-
-			}
-			this.shadersBuffer.putShort(this.shadersData[0]).putShort(this.shadersData[1]);
-		}
-		// Spout End
-		
 		++this.addedVertices;
 
 		if (this.drawMode == 7 && convertQuadsToTriangles && this.addedVertices % 4 == 0) {

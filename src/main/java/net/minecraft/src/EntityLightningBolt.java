@@ -1,9 +1,9 @@
 package net.minecraft.src;
 
-import java.util.Iterator;
 import java.util.List;
-
-import org.spoutcraft.client.entity.CraftLightningStrike;
+// Spout Start
+import java.util.Iterator;
+// Spout End
 
 public class EntityLightningBolt extends EntityWeatherEffect {
 
@@ -31,8 +31,9 @@ public class EntityLightningBolt extends EntityWeatherEffect {
 		this.lightningState = 2;
 		this.boltVertex = this.rand.nextLong();
 		this.boltLivingTime = this.rand.nextInt(3) + 1;
+
 		// Spout Start
-		if (!effect && par1World.difficultySetting >= 2 && par1World.doChunksNearChunkExist(MathHelper.floor_double(par2), MathHelper.floor_double(par4), MathHelper.floor_double(par6), 10)) {
+		if (!par1World.isRemote && !effect && par1World.difficultySetting >= 2 && par1World.doChunksNearChunkExist(MathHelper.floor_double(par2), MathHelper.floor_double(par4), MathHelper.floor_double(par6), 10)) {
 		// Spout End
 			int var8 = MathHelper.floor_double(par2);
 			int var9 = MathHelper.floor_double(par4);
@@ -52,11 +53,6 @@ public class EntityLightningBolt extends EntityWeatherEffect {
 				}
 			}
 		}
-		
-		// Spout Start
-		this.spoutEntity = new CraftLightningStrike(this);
-		// Spout End
-
 	}
 
 	/**
@@ -79,8 +75,9 @@ public class EntityLightningBolt extends EntityWeatherEffect {
 				--this.boltLivingTime;
 				this.lightningState = 1;
 				this.boltVertex = this.rand.nextLong();
+
 				// Spout Start
-				if (!effect && this.worldObj.doChunksNearChunkExist(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ), 10)) {
+				if (!this.worldObj.isRemote && !effect && this.worldObj.doChunksNearChunkExist(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ), 10)) {
 				// Spout End
 					int var1 = MathHelper.floor_double(this.posX);
 					int var2 = MathHelper.floor_double(this.posY);
@@ -94,18 +91,19 @@ public class EntityLightningBolt extends EntityWeatherEffect {
 		}
 
 		// Spout Start
-		if(!effect && this.lightningState >= 0) {
+		if (!this.worldObj.isRemote && !effect && this.lightningState >= 0) {
 		// Spout End
-			double var6 = 3.0D;
-			List var7 = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, AxisAlignedBB.getAABBPool().addOrModifyAABBInPool(this.posX - var6, this.posY - var6, this.posZ - var6, this.posX + var6, this.posY + 6.0D + var6, this.posZ + var6));
-			Iterator var4 = var7.iterator();
+			if (this.worldObj.isRemote) {
+				this.worldObj.lightningFlash = 2;
+			} else {
+				double var6 = 3.0D;
+				List var7 = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, AxisAlignedBB.getAABBPool().addOrModifyAABBInPool(this.posX - var6, this.posY - var6, this.posZ - var6, this.posX + var6, this.posY + 6.0D + var6, this.posZ + var6));
 
-			while (var4.hasNext()) {
-				Entity var5 = (Entity)var4.next();
-				var5.onStruckByLightning(this);
+				for (int var4 = 0; var4 < var7.size(); ++var4) {
+					Entity var5 = (Entity)var7.get(var4);
+					var5.onStruckByLightning(this);
+				}
 			}
-
-			this.worldObj.lightningFlash = 2;
 		}
 	}
 

@@ -19,21 +19,31 @@
  */
 package org.spoutcraft.client.io;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.src.GuiYesNo;
+import net.minecraft.src.RenderManager;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-
-import net.minecraft.client.Minecraft;
-
 import org.spoutcraft.client.SpoutClient;
+import org.spoutcraft.client.gui.CustomScreen;
+import org.spoutcraft.client.gui.precache.GuiPrecache;
 
 public class FileUtil {
 	private static final String[] validExtensions = {"txt", "yml", "xml", "png", "jpg", "ogg", "midi", "wav", "zip"};
@@ -177,7 +187,7 @@ public class FileUtil {
 			SpoutClient.disableSandbox();
 		}
 
-		String fileName = Minecraft.theMinecraft.renderEngine.texturePack.selectedTexturePack.func_77538_c();
+		String fileName = Minecraft.theMinecraft.renderEngine.texturePack.selectedTexturePack.getTexturePackFileName();
 		File file = new File(getTexturePackDir(), fileName);
 		if (!file.exists()) {
 			file = new File(new File(Minecraft.getAppDir("minecraft"), "texturepacks"), fileName);
@@ -297,5 +307,19 @@ public class FileUtil {
 	public static boolean canCache(String fileUrl) {
 		String filename = FileUtil.getFileName(fileUrl);
 		return FilenameUtils.isExtension(filename, validExtensions);
+	}
+
+	public static boolean deleteDirectory(File path) {
+		if (path.exists()) {
+			File[] files = path.listFiles();
+			for (int i = 0; i < files.length; i++) {
+				if (files[i].isDirectory()) {
+					deleteDirectory(files[i]);
+				} else {
+					files[i].delete();
+				}
+			}
+		}
+		return path.delete();
 	}
 }

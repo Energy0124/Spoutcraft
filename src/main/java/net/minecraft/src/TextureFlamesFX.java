@@ -1,50 +1,55 @@
 package net.minecraft.src;
 
-// Spout HD Start
+// MCPatcher Start
 import com.pclewis.mcpatcher.mod.TileSize;
-// Spout HD End
-
+// MCPatcher End
 
 public class TextureFlamesFX extends TextureFX {
-
-	// Spout HD Start
+	// MCPatcher Start
 	protected float[] field_76869_g;
 	protected float[] field_76870_h;
-	// Spout HD End
+	// MCPatcher End
 
 	public TextureFlamesFX(int par1) {
 		super(Block.fire.blockIndexInTexture + par1 * 16);
-		// Spout HD Start
+		// MCPatcher Start
 		this.field_76869_g = new float[TileSize.int_flameArraySize];
 		this.field_76870_h = new float[TileSize.int_flameArraySize];
-		// Spout HD End
+		// MCPatcher End
 	}
 
 	public void onTick() {
 		int var3;
 		float var4;
 		int var6;
-		// Spout HD Start
+
+		// MCPatcher Start
 		for (int var1 = 0; var1 < TileSize.int_size; ++var1) {
 			for (int var2 = 0; var2 < TileSize.int_flameHeight; ++var2) {
+		// MCPatcher End
 				var3 = 18;
+				// MCPatcher Start
 				var4 = this.field_76869_g[var1 + (var2 + 1) % TileSize.int_flameHeight * TileSize.int_size] * (float)var3;
+				// MCPatcher End
 
 				for (int var5 = var1 - 1; var5 <= var1 + 1; ++var5) {
 					for (var6 = var2; var6 <= var2 + 1; ++var6) {
+						// MCPatcher Start
 						if (var5 >= 0 && var6 >= 0 && var5 < TileSize.int_size && var6 < TileSize.int_flameHeight) {
 							var4 += this.field_76869_g[var5 + var6 * TileSize.int_size];
+						// MCPatcher End
 						}
 
 						++var3;
 					}
 				}
 
+				// MCPatcher Start
 				this.field_76870_h[var1 + var2 * TileSize.int_size] = var4 / ((float)var3 * TileSize.float_flameNudge);
 
 				if (var2 >= TileSize.int_flameHeightMinus1) {
 					this.field_76870_h[var1 + var2 * TileSize.int_size] = (float)(Math.random() * Math.random() * Math.random() * 4.0D + Math.random() * 0.10000000149011612D + 0.20000000298023224D);
-					// Spout HD End
+				// MCPatcher End
 				}
 			}
 		}
@@ -53,7 +58,9 @@ public class TextureFlamesFX extends TextureFX {
 		this.field_76870_h = this.field_76869_g;
 		this.field_76869_g = var13;
 
-		for (var3 = 0; var3 < TileSize.int_numPixels; ++var3) { // Spout HD
+		// MCPatcher Start
+		for (var3 = 0; var3 < TileSize.int_numPixels; ++var3) {
+		// MCPatcher End
 			var4 = this.field_76869_g[var3] * 1.8F;
 
 			if (var4 > 1.0F) {

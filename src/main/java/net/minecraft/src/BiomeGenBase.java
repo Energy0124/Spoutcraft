@@ -4,6 +4,9 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+// MCPatcher Start
+import com.pclewis.mcpatcher.mod.Colorizer;
+// MCPatcher End
 
 public abstract class BiomeGenBase {
 
@@ -88,6 +91,7 @@ public abstract class BiomeGenBase {
 	 * Holds the classes of any aquatic creature that can be spawned in the water of the biome.
 	 */
 	protected List spawnableWaterCreatureList;
+	protected List field_82914_M;
 
 	/** Set to true if snow is enabled for this biome. */
 	private boolean enableSnow;
@@ -99,11 +103,17 @@ public abstract class BiomeGenBase {
 
 	/** The id number to this biome, and its index in the biomeList array. */
 	public final int biomeID;
+
+	/** The tree generator. */
 	protected WorldGenTrees worldGeneratorTrees;
 
 	/** The big tree generator. */
 	protected WorldGenBigTree worldGeneratorBigTree;
+
+	/** The forest generator. */
 	protected WorldGenForest worldGeneratorForest;
+
+	/** The swamp tree generator. */
 	protected WorldGenSwamp worldGeneratorSwamp;
 
 	protected BiomeGenBase(int par1) {
@@ -118,6 +128,7 @@ public abstract class BiomeGenBase {
 		this.spawnableMonsterList = new ArrayList();
 		this.spawnableCreatureList = new ArrayList();
 		this.spawnableWaterCreatureList = new ArrayList();
+		this.field_82914_M = new ArrayList();
 		this.enableRain = true;
 		this.worldGeneratorTrees = new WorldGenTrees(false);
 		this.worldGeneratorBigTree = new WorldGenBigTree(false);
@@ -137,6 +148,7 @@ public abstract class BiomeGenBase {
 		this.spawnableMonsterList.add(new SpawnListEntry(EntitySlime.class, 10, 4, 4));
 		this.spawnableMonsterList.add(new SpawnListEntry(EntityEnderman.class, 1, 1, 4));
 		this.spawnableWaterCreatureList.add(new SpawnListEntry(EntitySquid.class, 10, 4, 4));
+		this.field_82914_M.add(new SpawnListEntry(EntityBat.class, 10, 8, 8));
 	}
 
 	/**
@@ -183,16 +195,22 @@ public abstract class BiomeGenBase {
 		return (WorldGenerator)(par1Random.nextInt(10) == 0 ? this.worldGeneratorBigTree : this.worldGeneratorTrees);
 	}
 
+	/**
+	 * Gets a WorldGen appropriate for this biome.
+	 */
+	public WorldGenerator getRandomWorldGenForGrass(Random par1Random) {
+		return new WorldGenTallGrass(Block.tallGrass.blockID, 1);
+	}
+
+	/**
+	 * sets enableSnow to true during biome initialization. returns BiomeGenBase.
+	 */
 	protected BiomeGenBase setEnableSnow() {
 		this.enableSnow = true;
 		return this;
 	}
 
-
-	/**
-	 * sets enableSnow to true during biome initialization. returns BiomeGenBase.
-	 */
-	// Spout Start
+	// MCPatcher Start
 	protected BiomeGenBase setEnableSnow(boolean bool) {
 		enableSnow = bool;
 		return this;
@@ -206,17 +224,13 @@ public abstract class BiomeGenBase {
 	protected String getBiomeName() {
 		return biomeName;
 	}
-	// Spout End
-
-	/**
-	 * Gets a WorldGen appropriate for this biome.
-	 */
-	public WorldGenerator getRandomWorldGenForGrass(Random par1Random) {
-		return new WorldGenTallGrass(Block.tallGrass.blockID, 1);
-	}
+	// MCPatcher End
 
 	protected BiomeGenBase setBiomeName(String par1Str) {
 		this.biomeName = par1Str;
+		// MCPatcher Start
+		Colorizer.setupBiome(this);
+		// MCPatcher End
 		return this;
 	}
 
@@ -251,7 +265,7 @@ public abstract class BiomeGenBase {
 	 * Returns the correspondent list of the EnumCreatureType informed.
 	 */
 	public List getSpawnableList(EnumCreatureType par1EnumCreatureType) {
-		return par1EnumCreatureType == EnumCreatureType.monster ? this.spawnableMonsterList : (par1EnumCreatureType == EnumCreatureType.creature ? this.spawnableCreatureList : (par1EnumCreatureType == EnumCreatureType.waterCreature ? this.spawnableWaterCreatureList : null));
+		return par1EnumCreatureType == EnumCreatureType.monster ? this.spawnableMonsterList : (par1EnumCreatureType == EnumCreatureType.creature ? this.spawnableCreatureList : (par1EnumCreatureType == EnumCreatureType.waterCreature ? this.spawnableWaterCreatureList : (par1EnumCreatureType == EnumCreatureType.ambient ? this.field_82914_M : null)));
 	}
 
 	/**

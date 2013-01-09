@@ -1,11 +1,8 @@
 package net.minecraft.src;
 
-import net.minecraft.client.Minecraft;
 // Spout Start
 import org.bukkit.ChatColor;
-import org.spoutcraft.client.player.SpoutPlayer;
 import org.spoutcraft.client.special.Resources;
-import org.spoutcraft.client.special.VIP;
 // Spout End
 public class EntityOtherPlayerMP extends EntityPlayer {
 	private boolean isItemInUse = false;
@@ -21,12 +18,13 @@ public class EntityOtherPlayerMP extends EntityPlayer {
 		this.username = par2Str;
 		this.yOffset = 0.0F;
 		this.stepHeight = 0.0F;
-		// Spout Start
+
 		if (par2Str != null && par2Str.length() > 0) {
+			// Spout Start
 			this.skinUrl = "http://cdn.spout.org/game/vanilla/skin/" + ChatColor.stripColor(par2Str) + ".png";
 			this.vip = Resources.getVIP(ChatColor.stripColor(par2Str));
+			// Spout End
 		}
-		// Spout End
 
 		this.noClip = true;
 		this.field_71082_cx = 0.25F;
@@ -37,8 +35,6 @@ public class EntityOtherPlayerMP extends EntityPlayer {
 		} else {
 			displayName = username;
 		}
-		spoutEntity = new SpoutPlayer(this);
-		((SpoutPlayer) spoutEntity).setPlayer(this);
 		this.worldObj.releaseEntitySkin(this);
 		worldObj.obtainEntitySkin(this);
 		// Spout End
@@ -71,6 +67,14 @@ public class EntityOtherPlayerMP extends EntityPlayer {
 		this.otherPlayerMPPosRotationIncrements = par9;
 	}
 
+	public void updateCloak() {
+		// Spout Start
+		if (this.cloakUrl == null || this.playerCloakUrl == null) {
+			super.updateCloak();
+		}
+		// Spout End
+	}
+
 	/**
 	 * Called to update the entity's position/logic.
 	 */
@@ -87,7 +91,7 @@ public class EntityOtherPlayerMP extends EntityPlayer {
 		}
 
 		this.legYaw += (var5 - this.legYaw) * 0.4F;
-		this.field_70754_ba += this.legYaw;
+		this.legSwing += this.legYaw;
 
 		if (!this.isItemInUse && this.isEating() && this.inventory.mainInventory[this.inventory.currentItem] != null) {
 			ItemStack var6 = this.inventory.mainInventory[this.inventory.currentItem];
@@ -151,7 +155,10 @@ public class EntityOtherPlayerMP extends EntityPlayer {
 		this.cameraPitch += (var2 - this.cameraPitch) * 0.8F;
 	}
 
-	public void func_70062_b(int par1, ItemStack par2ItemStack) {
+	/**
+	 * Sets the held item, or an armor slot. Slot 0 is held item. Slot 1-4 is armor. Params: Item, slot
+	 */
+	public void setCurrentItemOrArmor(int par1, ItemStack par2ItemStack) {
 		if (par1 == 0) {
 			this.inventory.mainInventory[this.inventory.currentItem] = par2ItemStack;
 		} else {
@@ -164,21 +171,23 @@ public class EntityOtherPlayerMP extends EntityPlayer {
 	}
 
 	public void sendChatToPlayer(String par1Str) {
-		//Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(par1Str); // Spout removed TODO
+		// Spout Start - Removed
+		// TODO: Something?
+		//Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(par1Str);
+		// Spout End
 	}
 
 	/**
 	 * Returns true if the command sender is allowed to use the given command.
 	 */
-	public boolean canCommandSenderUseCommand(String par1Str) {
+	public boolean canCommandSenderUseCommand(int par1, String par2Str) {
 		return false;
 	}
 
-	// Spout Start
-	public void updateCloak() {
-		if (this.cloakUrl == null || this.playerCloakUrl == null) {
-			super.updateCloak();
-		}
+	/**
+	 * Return the coordinates for this player as ChunkCoordinates.
+	 */
+	public ChunkCoordinates getPlayerCoordinates() {
+		return new ChunkCoordinates(MathHelper.floor_double(this.posX + 0.5D), MathHelper.floor_double(this.posY + 0.5D), MathHelper.floor_double(this.posZ + 0.5D));
 	}
-	// Spout End
 }

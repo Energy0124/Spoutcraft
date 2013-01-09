@@ -1,8 +1,6 @@
 package net.minecraft.src;
 
 // Spout Start
-import org.spoutcraft.client.entity.CraftPig;
-import org.spoutcraft.client.entity.CraftWolf;
 import org.spoutcraft.api.entity.EntitySkinType;
 // Spout End
 
@@ -40,9 +38,6 @@ public class EntityWolf extends EntityTameable {
 		this.targetTasks.addTask(2, new EntityAIOwnerHurtTarget(this));
 		this.targetTasks.addTask(3, new EntityAIHurtByTarget(this, true));
 		this.targetTasks.addTask(4, new EntityAITargetNonTamed(this, EntitySheep.class, 16.0F, 200, false));
-		// Spout Start
-		this.spoutEntity = new CraftWolf(this);
-		// Spout End
 	}
 
 	/**
@@ -78,14 +73,14 @@ public class EntityWolf extends EntityTameable {
 		super.entityInit();
 		this.dataWatcher.addObject(18, new Integer(this.getHealth()));
 		this.dataWatcher.addObject(19, new Byte((byte)0));
+		this.dataWatcher.addObject(20, new Byte((byte)BlockCloth.getBlockFromDye(1)));
 	}
 
 	/**
-	 * returns if this entity triggers Block.onEntityWalking on the blocks they walk on. used for spiders and wolves to
-	 * prevent them from trampling crops
+	 * Plays step sound at given x, y, z for the entity
 	 */
-	protected boolean canTriggerWalking() {
-		return false;
+	protected void playStepSound(int par1, int par2, int par3, int par4) {
+		this.playSound("mob.wolf.step", 0.15F, 1.0F);
 	}
 
 	/**
@@ -110,6 +105,7 @@ public class EntityWolf extends EntityTameable {
 	public void writeEntityToNBT(NBTTagCompound par1NBTTagCompound) {
 		super.writeEntityToNBT(par1NBTTagCompound);
 		par1NBTTagCompound.setBoolean("Angry", this.isAngry());
+		par1NBTTagCompound.setByte("CollarColor", (byte)this.getCollarColor());
 	}
 
 	/**
@@ -118,6 +114,10 @@ public class EntityWolf extends EntityTameable {
 	public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound) {
 		super.readEntityFromNBT(par1NBTTagCompound);
 		this.setAngry(par1NBTTagCompound.getBoolean("Angry"));
+
+		if (par1NBTTagCompound.hasKey("CollarColor")) {
+			this.setCollarColor(par1NBTTagCompound.getByte("CollarColor"));
+		}
 	}
 
 	/**
@@ -201,7 +201,7 @@ public class EntityWolf extends EntityTameable {
 			this.prevTimeWolfIsShaking = 0.0F;
 		} else if ((this.isShaking || this.field_70928_h) && this.field_70928_h) {
 			if (this.timeWolfIsShaking == 0.0F) {
-				this.worldObj.playSoundAtEntity(this, "mob.wolf.shake", this.getSoundVolume(), (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F);
+				this.playSound("mob.wolf.shake", this.getSoundVolume(), (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F);
 			}
 
 			this.prevTimeWolfIsShaking = this.timeWolfIsShaking;
@@ -270,14 +270,18 @@ public class EntityWolf extends EntityTameable {
 	 * Called when the entity is attacked.
 	 */
 	public boolean attackEntityFrom(DamageSource par1DamageSource, int par2) {
-		Entity var3 = par1DamageSource.getEntity();
-		this.aiSit.setSitting(false);
+		if (this.isEntityInvulnerable()) {
+			return false;
+		} else {
+			Entity var3 = par1DamageSource.getEntity();
+			this.aiSit.setSitting(false);
 
-		if (var3 != null && !(var3 instanceof EntityPlayer) && !(var3 instanceof EntityArrow)) {
-			par2 = (par2 + 1) / 2;
+			if (var3 != null && !(var3 instanceof EntityPlayer) && !(var3 instanceof EntityArrow)) {
+				par2 = (par2 + 1) / 2;
+			}
+
+			return super.attackEntityFrom(par1DamageSource, par2);
 		}
-
-		return super.attackEntityFrom(par1DamageSource, par2);
 	}
 
 	public boolean attackEntityAsMob(Entity par1Entity) {
@@ -292,30 +296,44 @@ public class EntityWolf extends EntityTameable {
 		ItemStack var2 = par1EntityPlayer.inventory.getCurrentItem();
 
 		if (this.isTamed()) {
-			if (var2 != null && Item.itemsList[var2.itemID] instanceof ItemFood) {
-				ItemFood var3 = (ItemFood)Item.itemsList[var2.itemID];
+			if (var2 != null) {
+				if (Item.itemsList[var2.itemID] instanceof ItemFood) {
+					ItemFood var3 = (ItemFood)Item.itemsList[var2.itemID];
 
-				if (var3.isWolfsFavoriteMeat() && this.dataWatcher.getWatchableObjectInt(18) < 20) {
-					if (!par1EntityPlayer.capabilities.isCreativeMode) {
-						--var2.stackSize;
+					if (var3.isWolfsFavoriteMeat() && this.dataWatcher.getWatchableObjectInt(18) < 20) {
+						if (!par1EntityPlayer.capabilities.isCreativeMode) {
+							--var2.stackSize;
+						}
+
+						this.heal(var3.getHealAmount());
+
+						if (var2.stackSize <= 0) {
+							par1EntityPlayer.inventory.setInventorySlotContents(par1EntityPlayer.inventory.currentItem, (ItemStack)null);
+						}
+
+						return true;
 					}
+				} else if (var2.itemID == Item.dyePowder.itemID) {
+					int var4 = BlockCloth.getBlockFromDye(var2.getItemDamage());
 
-					this.heal(var3.getHealAmount());
+					if (var4 != this.getCollarColor()) {
+						this.setCollarColor(var4);
 
-					if (var2.stackSize <= 0) {
-						par1EntityPlayer.inventory.setInventorySlotContents(par1EntityPlayer.inventory.currentItem, (ItemStack)null);
+						if (!par1EntityPlayer.capabilities.isCreativeMode && --var2.stackSize <= 0) {
+							par1EntityPlayer.inventory.setInventorySlotContents(par1EntityPlayer.inventory.currentItem, (ItemStack)null);
+						}
+
+						return true;
 					}
-
-					return true;
 				}
 			}
 
-			if (par1EntityPlayer.username.equalsIgnoreCase(this.getOwnerName()) && !this.worldObj.isRemote && !this.isWheat(var2)) {
+			if (par1EntityPlayer.username.equalsIgnoreCase(this.getOwnerName()) && !this.worldObj.isRemote && !this.isBreedingItem(var2)) {
 				this.aiSit.setSitting(!this.isSitting());
 				this.isJumping = false;
 				this.setPathToEntity((PathEntity)null);
 			}
-		} else if (var2 != null && var2.itemID == Item.bone.shiftedIndex && !this.isAngry()) {
+		} else if (var2 != null && var2.itemID == Item.bone.itemID && !this.isAngry()) {
 			if (!par1EntityPlayer.capabilities.isCreativeMode) {
 				--var2.stackSize;
 			}
@@ -361,9 +379,10 @@ public class EntityWolf extends EntityTameable {
 	}
 
 	/**
-	 * Checks if the parameter is an wheat item.
+	 * Checks if the parameter is an item which this animal can be fed to breed it (wheat, carrots or seeds depending on
+	 * the animal type)
 	 */
-	public boolean isWheat(ItemStack par1ItemStack) {
+	public boolean isBreedingItem(ItemStack par1ItemStack) {
 		return par1ItemStack == null ? false : (!(Item.itemsList[par1ItemStack.itemID] instanceof ItemFood) ? false : ((ItemFood)Item.itemsList[par1ItemStack.itemID]).isWolfsFavoriteMeat());
 	}
 
@@ -395,12 +414,31 @@ public class EntityWolf extends EntityTameable {
 	}
 
 	/**
+	 * Return this wolf's collar color.
+	 */
+	public int getCollarColor() {
+		return this.dataWatcher.getWatchableObjectByte(20) & 15;
+	}
+
+	/**
+	 * Set this wolf's collar color.
+	 */
+	public void setCollarColor(int par1) {
+		this.dataWatcher.updateObject(20, Byte.valueOf((byte)(par1 & 15)));
+	}
+
+	/**
 	 * This function is used when two same-species animals in 'love mode' breed to generate the new baby animal.
 	 */
-	public EntityAnimal spawnBabyAnimal(EntityAnimal par1EntityAnimal) {
+	public EntityWolf spawnBabyAnimal(EntityAgeable par1EntityAgeable) {
 		EntityWolf var2 = new EntityWolf(this.worldObj);
-		var2.setOwner(this.getOwnerName());
-		var2.setTamed(true);
+		String var3 = this.getOwnerName();
+
+		if (var3 != null && var3.trim().length() > 0) {
+			var2.setOwner(var3);
+			var2.setTamed(true);
+		}
+
 		return var2;
 	}
 
@@ -432,5 +470,9 @@ public class EntityWolf extends EntityTameable {
 
 	public boolean func_70922_bv() {
 		return this.dataWatcher.getWatchableObjectByte(19) == 1;
+	}
+
+	public EntityAgeable createChild(EntityAgeable par1EntityAgeable) {
+		return this.spawnBabyAnimal(par1EntityAgeable);
 	}
 }

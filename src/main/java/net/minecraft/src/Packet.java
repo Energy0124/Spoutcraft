@@ -4,13 +4,15 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
+import java.net.Socket;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
+// Spout Start
 import org.spoutcraft.client.SpoutClient;
 import org.spoutcraft.api.material.MaterialData;
+// Spout End
 
 public abstract class Packet {
 
@@ -28,10 +30,10 @@ public abstract class Packet {
 
 	/** the system time in milliseconds when this packet was created. */
 	public final long creationTimeMillis = System.currentTimeMillis();
-	public static long recievedID;
-	public static long recievedSize;
+	public static long receivedID;
+	public static long receivedSize;
 
-	/** assumed to be sequential by the profiler */
+	/** Assumed to be sequential by the profiler. */
 	public static long sentID;
 	public static long sentSize;
 
@@ -44,7 +46,9 @@ public abstract class Packet {
 	/**
 	 * Adds a two way mapping between the packet ID and packet class.
 	 */
-	public static void addIdClassMapping(int par0, boolean par1, boolean par2, Class par3Class) { // Spout default -> public
+	// Spout Start - static to public static
+	public static void addIdClassMapping(int par0, boolean par1, boolean par2, Class par3Class) {
+	// Spout End
 		if (packetIdToClassMap.containsItem(par0)) {
 			throw new IllegalArgumentException("Duplicate packet id:" + par0);
 		} else if (packetClassToIdMap.containsKey(par3Class)) {
@@ -110,40 +114,46 @@ public abstract class Packet {
 	/**
 	 * Read a packet, prefixed by its ID, from the data stream.
 	 */
-	public static Packet readPacket(DataInputStream par0DataInputStream, boolean par1) throws IOException {
-		boolean var2 = false;
-		Packet var3 = null;
-		int var6;
+	public static Packet readPacket(DataInputStream par0DataInputStream, boolean par1, Socket par2Socket) throws IOException {
+		boolean var3 = false;
+		Packet var4 = null;
+		int var5 = par2Socket.getSoTimeout();
+		int var8;
 
 		try {
-			var6 = par0DataInputStream.read();
+			var8 = par0DataInputStream.read();
 
-			if (var6 == -1) {
+			if (var8 == -1) {
 				return null;
 			}
 
-			if (par1 && !serverPacketIdList.contains(Integer.valueOf(var6)) || !par1 && !clientPacketIdList.contains(Integer.valueOf(var6))) {
-				throw new IOException("Bad packet id " + var6);
+			if (par1 && !serverPacketIdList.contains(Integer.valueOf(var8)) || !par1 && !clientPacketIdList.contains(Integer.valueOf(var8))) {
+				throw new IOException("Bad packet id " + var8);
 			}
 
-			var3 = getNewPacket(var6);
+			var4 = getNewPacket(var8);
 
-			if (var3 == null) {
-				throw new IOException("Bad packet id " + var6);
+			if (var4 == null) {
+				throw new IOException("Bad packet id " + var8);
 			}
 
-			var3.readPacketData(par0DataInputStream);
-			++recievedID;
-			recievedSize += (long)var3.getPacketSize();
-		} catch (EOFException var5) {
+			if (var4 instanceof Packet254ServerPing) {
+				par2Socket.setSoTimeout(1500);
+			}
+
+			var4.readPacketData(par0DataInputStream);
+			++receivedID;
+			receivedSize += (long)var4.getPacketSize();
+		} catch (EOFException var7) {
 			System.out.println("Reached end of stream");
 			return null;
 		}
 
-		PacketCount.countPacket(var6, (long)var3.getPacketSize());
-		++recievedID;
-		recievedSize += (long)var3.getPacketSize();
-		return var3;
+		PacketCount.countPacket(var8, (long)var4.getPacketSize());
+		++receivedID;
+		receivedSize += (long)var4.getPacketSize();
+		par2Socket.setSoTimeout(var5);
+		return var4;
 	}
 
 	/**
@@ -225,9 +235,10 @@ public abstract class Packet {
 	}
 
 	/**
-	 * if this returns false, processPacket is deffered for processReadPackets to handle
+	 * If this returns true, the packet may be processed on any thread; otherwise it is queued for the main thread to
+	 * handle.
 	 */
-	public boolean isWritePacket() {
+	public boolean canProcessAsync() {
 		return false;
 	}
 
@@ -318,12 +329,14 @@ public abstract class Packet {
 		addIdClassMapping(13, true, true, Packet13PlayerLookMove.class);
 		addIdClassMapping(14, false, true, Packet14BlockDig.class);
 		addIdClassMapping(15, false, true, Packet15Place.class);
-		addIdClassMapping(16, false, true, Packet16BlockItemSwitch.class);
+		addIdClassMapping(16, true, true, Packet16BlockItemSwitch.class);
 		addIdClassMapping(17, true, false, Packet17Sleep.class);
 		addIdClassMapping(18, true, true, Packet18Animation.class);
 		addIdClassMapping(19, false, true, Packet19EntityAction.class);
 		addIdClassMapping(20, true, false, Packet20NamedEntitySpawn.class);
-		addIdClassMapping(21, true, false, Packet21PickupSpawn.class);
+		// Spout Start
+		//addIdClassMapping(21, true, false, Packet21PickupSpawn.class);
+		// Spout End
 		addIdClassMapping(22, true, false, Packet22Collect.class);
 		addIdClassMapping(23, true, false, Packet23VehicleSpawn.class);
 		addIdClassMapping(24, true, false, Packet24MobSpawn.class);

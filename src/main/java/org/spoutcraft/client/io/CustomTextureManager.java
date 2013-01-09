@@ -204,9 +204,9 @@ public class CustomTextureManager {
 
 	public static Texture getTextureFromUrl(String url) {
 		Texture tex = getTextureFromUrl(null, url);
-		/*if (tex == null) {
+		if (tex == null) {
 			tex = CustomTextureManager.getTextureFromJar("/res/block/spout.png");
-		}*/
+		}
 		return tex;
 	}
 

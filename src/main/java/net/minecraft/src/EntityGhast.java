@@ -1,7 +1,6 @@
 package net.minecraft.src;
 
 // Spout Start
-import org.spoutcraft.client.entity.CraftGhast;
 import org.spoutcraft.api.entity.EntitySkinType;
 // Spout End
 
@@ -16,6 +15,7 @@ public class EntityGhast extends EntityFlying implements IMob {
 	private int aggroCooldown = 0;
 	public int prevAttackCounter = 0;
 	public int attackCounter = 0;
+	private int field_92014_j = 1;
 
 	public EntityGhast(World par1World) {
 		super(par1World);
@@ -23,16 +23,15 @@ public class EntityGhast extends EntityFlying implements IMob {
 		this.setSize(4.0F, 4.0F);
 		this.isImmuneToFire = true;
 		this.experienceValue = 5;
-		// Spout Start
-		this.spoutEntity = new CraftGhast(this);
-		// Spout End
 	}
 
 	/**
 	 * Called when the entity is attacked.
 	 */
 	public boolean attackEntityFrom(DamageSource par1DamageSource, int par2) {
-		if ("fireball".equals(par1DamageSource.getDamageType()) && par1DamageSource.getEntity() instanceof EntityPlayer) {
+		if (this.isEntityInvulnerable()) {
+			return false;
+		} else if ("fireball".equals(par1DamageSource.getDamageType()) && par1DamageSource.getEntity() instanceof EntityPlayer) {
 			super.attackEntityFrom(par1DamageSource, 1000);
 			((EntityPlayer)par1DamageSource.getEntity()).triggerAchievement(AchievementList.ghast);
 			return true;
@@ -124,7 +123,8 @@ public class EntityGhast extends EntityFlying implements IMob {
 
 				if (this.attackCounter == 20) {
 					this.worldObj.playAuxSFXAtEntity((EntityPlayer)null, 1008, (int)this.posX, (int)this.posY, (int)this.posZ, 0);
-					EntityFireball var17 = new EntityFireball(this.worldObj, this, var11, var13, var15);
+					EntityLargeFireball var17 = new EntityLargeFireball(this.worldObj, this, var11, var13, var15);
+					var17.field_92057_e = this.field_92014_j;
 					double var18 = 4.0D;
 					Vec3 var20 = this.getLook(1.0F);
 					var17.posX = this.posX + var20.xCoord * var18;
@@ -199,24 +199,25 @@ public class EntityGhast extends EntityFlying implements IMob {
 	 * Returns the item ID for the item the mob drops on death.
 	 */
 	protected int getDropItemId() {
-		return Item.gunpowder.shiftedIndex;
+		return Item.gunpowder.itemID;
 	}
 
 	/**
-	 * Drop 0-2 items of this living's type
+	 * Drop 0-2 items of this living's type. @param par1 - Whether this entity has recently been hit by a player. @param
+	 * par2 - Level of Looting used to kill this mob.
 	 */
 	protected void dropFewItems(boolean par1, int par2) {
 		int var3 = this.rand.nextInt(2) + this.rand.nextInt(1 + par2);
 		int var4;
 
 		for (var4 = 0; var4 < var3; ++var4) {
-			this.dropItem(Item.ghastTear.shiftedIndex, 1);
+			this.dropItem(Item.ghastTear.itemID, 1);
 		}
 
 		var3 = this.rand.nextInt(3) + this.rand.nextInt(1 + par2);
 
 		for (var4 = 0; var4 < var3; ++var4) {
-			this.dropItem(Item.gunpowder.shiftedIndex, 1);
+			this.dropItem(Item.gunpowder.itemID, 1);
 		}
 	}
 
@@ -239,5 +240,24 @@ public class EntityGhast extends EntityFlying implements IMob {
 	 */
 	public int getMaxSpawnedInChunk() {
 		return 1;
+	}
+
+	/**
+	 * (abstract) Protected helper method to write subclass entity data to NBT.
+	 */
+	public void writeEntityToNBT(NBTTagCompound par1NBTTagCompound) {
+		super.writeEntityToNBT(par1NBTTagCompound);
+		par1NBTTagCompound.setInteger("ExplosionPower", this.field_92014_j);
+	}
+
+	/**
+	 * (abstract) Protected helper method to read subclass entity data from NBT.
+	 */
+	public void readEntityFromNBT(NBTTagCompound par1NBTTagCompound) {
+		super.readEntityFromNBT(par1NBTTagCompound);
+
+		if (par1NBTTagCompound.hasKey("ExplosionPower")) {
+			this.field_92014_j = par1NBTTagCompound.getInteger("ExplosionPower");
+		}
 	}
 }

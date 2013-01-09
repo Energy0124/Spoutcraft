@@ -26,11 +26,11 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.pclewis.mcpatcher.mod.Shaders;
-
 import net.minecraft.client.Minecraft;
 
 import org.spoutcraft.client.io.FileUtil;
+
+import org.lwjgl.opengl.GL11;
 
 public class Configuration {
 
@@ -53,7 +53,6 @@ public class Configuration {
 	private static boolean farView = false;
 	private static boolean fancyLight = false;
 	private static boolean fancyParticles = false;
-	private static int shaderType = 0;
 	private static int fastDebug = 0;
 	private static int guiScale = 0;
 	private static int performance = 0;
@@ -68,20 +67,12 @@ public class Configuration {
 	private static boolean viewBobbing = false;
 	private static boolean voidFog = true;
 	private static boolean weather = true;
-	private static boolean delayedTooltips = false;
+	private static boolean delayedTooltips = true;
 	private static float mipmapsPercent = 0F;
 	private static boolean automatePerformance = true;
 	private static int automateMode = 0;
-	private static boolean showChatColors = true;
-	private static boolean showJoinMessages = true;
-	private static boolean showDamageAlerts = true;
-	private static boolean highlightMentions = true;
-	private static boolean chatGrabsMouse = true;
-	private static boolean ignorePeople = false;
-	private static boolean chatUsesRegex;
 	private static boolean clientLight = false;
 	private static float flightSpeedFactor = 1.0F;
-	private static boolean askBeforeOpeningUrl = true;
 	private static boolean replaceTools = false;
 	private static boolean replaceBlocks = false;
 	private static boolean hotbarQuickKeysEnabled = true;
@@ -90,9 +81,12 @@ public class Configuration {
 	private static int resizedScreenshotHeight = 3200;
 	private static float chatOpacity = 0.5f;
 	private static int mainMenuState = defaultMenuState();
-	private static boolean connectedTextures = true;
+	private static boolean connectedTextures = false;
 	private static boolean advancedOptions = false;
-	
+	private static boolean randomMobTextures = true;
+	private static boolean ambientOcclusion = true;
+	private static boolean serverTexturePromptsEnabled = true;
+
 	//Config-specific
 	private static transient Map<String, Object> defaultSettings = new HashMap<String, Object>();
 	private static transient boolean dirty = false;
@@ -110,7 +104,7 @@ public class Configuration {
 			}
 			org.bukkit.util.config.Configuration config = new org.bukkit.util.config.Configuration(configFile);
 			config.load();
-			
+
 			Field[] fields = Configuration.class.getDeclaredFields();
 			for (int i = 0; i < fields.length; i++) {
 				Field f = fields[i];
@@ -118,7 +112,7 @@ public class Configuration {
 					f.setAccessible(true);
 					Object value = f.get(null);
 					defaultSettings.put(f.getName(), value);
-					
+
 					if (value instanceof Boolean) {
 						f.set(null, config.getBoolean(f.getName(), (Boolean)value));
 					} else if (value instanceof Integer) {
@@ -160,7 +154,6 @@ public class Configuration {
 		}
 	}
 
-
 	private static void updateMCConfig() {
 		Minecraft.theMinecraft.gameSettings.anaglyph = Configuration.isAnaglyph3D();
 		Minecraft.theMinecraft.gameSettings.renderDistance = Configuration.getRenderDistance();
@@ -176,11 +169,6 @@ public class Configuration {
 			org.lwjgl.opengl.Display.setVSyncEnabled(vsync);
 		}
 
-		if (!isShadersSupported()) {
-			Configuration.shaderType = 0;
-		}
-		Shaders.setMode(getShaderType());
-
 		if (Configuration.getSignDistance() < 8) {
 			signDistance = 8;
 		} else if (Configuration.getSignDistance() >= 128 && Configuration.getSignDistance() != Integer.MAX_VALUE) {
@@ -189,26 +177,23 @@ public class Configuration {
 	}
 
 	public static int defaultMenuState() {
-		if (Shaders.isOpenGL(3)) {
+		if (isOpenGL(3)) {
 			return 1;
 		}
-		if (Shaders.isOpenGL(2)) {
+		if (isOpenGL(2)) {
 			return 2;
 		}
 		return 3;
 	}
 
-	public static boolean isShadersSupported() {
-		if (Shaders.isOSX()) {
-			if (!Shaders.isOpenGL(2)) {
-				return false;
-			}
-		} else {
-			if (!Shaders.isOpenGL(3)) {
-				return false;
-			}
+	public static boolean isOpenGL(int v) {
+		try {
+			String version = GL11.glGetString(GL11.GL_VERSION);
+			return Integer.parseInt(String.valueOf(version.charAt(0))) >= v;
 		}
-		return true;
+		catch (Exception e) {
+			return false;
+		}
 	}
 
 	public static synchronized void restoreDefaults() {
@@ -391,15 +376,6 @@ public class Configuration {
 		onPropertyChange();
 	}
 
-	public static synchronized int getShaderType() {
-		return shaderType;
-	}
-
-	public static synchronized void setShaderType(int shaderType) {
-		Configuration.shaderType = shaderType;
-		onPropertyChange();
-	}
-
 	public static synchronized int getFastDebug() {
 		return fastDebug;
 	}
@@ -562,69 +538,6 @@ public class Configuration {
 		onPropertyChange();
 	}
 
-	public static synchronized boolean isShowChatColors() {
-		return showChatColors;
-	}
-
-	public static synchronized void setShowChatColors(boolean showChatColors) {
-		Configuration.showChatColors = showChatColors;
-		onPropertyChange();
-	}
-
-	public static synchronized boolean isShowJoinMessages() {
-		return showJoinMessages;
-	}
-
-	public static synchronized void setShowJoinMessages(boolean showJoinMessages) {
-		Configuration.showJoinMessages = showJoinMessages;
-		onPropertyChange();
-	}
-
-	public static synchronized boolean isShowDamageAlerts() {
-		return showDamageAlerts;
-	}
-
-	public static synchronized void setShowDamageAlerts(boolean showDamageAlerts) {
-		Configuration.showDamageAlerts = showDamageAlerts;
-		onPropertyChange();
-	}
-
-	public static synchronized boolean isHighlightMentions() {
-		return highlightMentions;
-	}
-
-	public static synchronized void setHighlightMentions(boolean highlightMentions) {
-		Configuration.highlightMentions = highlightMentions;
-		onPropertyChange();
-	}
-
-	public static synchronized boolean isChatGrabsMouse() {
-		return chatGrabsMouse;
-	}
-
-	public static synchronized void setChatGrabsMouse(boolean chatGrabsMouse) {
-		Configuration.chatGrabsMouse = chatGrabsMouse;
-		onPropertyChange();
-	}
-
-	public static synchronized boolean isIgnorePeople() {
-		return ignorePeople;
-	}
-
-	public static synchronized void setIgnorePeople(boolean ignorePeople) {
-		Configuration.ignorePeople = ignorePeople;
-		onPropertyChange();
-	}
-
-	public static synchronized boolean isChatUsesRegex() {
-		return chatUsesRegex;
-	}
-
-	public static synchronized void setChatUsesRegex(boolean chatUsesRegex) {
-		Configuration.chatUsesRegex = chatUsesRegex;
-		onPropertyChange();
-	}
-
 	public static synchronized boolean isClientLight() {
 		return clientLight;
 	}
@@ -640,15 +553,6 @@ public class Configuration {
 
 	public static synchronized void setFlightSpeedFactor(float flightSpeedFactor) {
 		Configuration.flightSpeedFactor = flightSpeedFactor;
-		onPropertyChange();
-	}
-
-	public static synchronized boolean isAskBeforeOpeningUrl() {
-		return askBeforeOpeningUrl;
-	}
-
-	public static synchronized void setAskBeforeOpeningUrl(boolean askBeforeOpeningUrl) {
-		Configuration.askBeforeOpeningUrl = askBeforeOpeningUrl;
 		onPropertyChange();
 	}
 
@@ -733,12 +637,39 @@ public class Configuration {
 		onPropertyChange();
 	}
 
+	public static synchronized boolean isRandomMobTextures() {
+		return randomMobTextures;
+	}
+
+	public static synchronized void setRandomMobTextures(boolean randomMobTextures) {
+		Configuration.randomMobTextures = randomMobTextures;
+		onPropertyChange();
+	}
+
 	public static synchronized boolean isAdvancedOptions() {
 		return advancedOptions;
 	}
 
 	public static synchronized void setAdvancedOptions(boolean advancedOptions) {
 		Configuration.advancedOptions = advancedOptions;
+		onPropertyChange();
+	}
+	
+	public static synchronized void setAmbientOcclusion(boolean ambientOcclusion) {
+		Configuration.ambientOcclusion = ambientOcclusion;
+		onPropertyChange();
+	}
+
+	public static synchronized boolean isAmbientOcclusion() {
+		return ambientOcclusion;
+	}
+	
+	public static synchronized boolean isServerTexturePromptsEnabled() {
+		return serverTexturePromptsEnabled;
+	}
+
+	public static synchronized void setServerTexturePromptsEnabled(boolean serverTexturePromptsEnabled) {
+		Configuration.serverTexturePromptsEnabled = serverTexturePromptsEnabled;
 		onPropertyChange();
 	}
 

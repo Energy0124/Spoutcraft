@@ -1,7 +1,5 @@
 package net.minecraft.src;
 
-import org.spoutcraft.client.entity.CraftTNTPrimed;
-
 public class EntityTNTPrimed extends Entity {
 
 	/** How long the fuse is */
@@ -17,9 +15,6 @@ public class EntityTNTPrimed extends Entity {
 		this.preventEntitySpawning = true;
 		this.setSize(0.98F, 0.98F);
 		this.yOffset = this.height / 2.0F;
-		// Spout Start
-		this.spoutEntity = new CraftTNTPrimed(this);
-		// Spout End
 	}
 
 	public EntityTNTPrimed(World par1World, double par2, double par4, double par6) {
@@ -84,7 +79,7 @@ public class EntityTNTPrimed extends Entity {
 
 	private void explode() {
 		// Spout Start
-		this.worldObj.newExplosion((Entity)null, this.posX, this.posY, this.posZ, yield, incendiary);
+		this.worldObj.newExplosion((Entity)null, this.posX, this.posY, this.posZ, yield, false, incendiary);
 		// Spout End
 	}
 

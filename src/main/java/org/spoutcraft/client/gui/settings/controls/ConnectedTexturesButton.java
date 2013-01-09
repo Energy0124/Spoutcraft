@@ -24,10 +24,9 @@ import net.minecraft.client.Minecraft;
 import org.spoutcraft.api.event.screen.ButtonClickEvent;
 import org.spoutcraft.api.gui.GenericCheckBox;
 import org.spoutcraft.client.config.Configuration;
-
 import com.pclewis.mcpatcher.TexturePackAPI;
 
-public class ConnectedTexturesButton extends GenericCheckBox {
+public class ConnectedTexturesButton extends AutomatedCheckBox {
 	public ConnectedTexturesButton() {
 		super("Connected Textures");
 		setChecked(Configuration.isConnectedTextures());
@@ -38,7 +37,8 @@ public class ConnectedTexturesButton extends GenericCheckBox {
 	public void onButtonClick(ButtonClickEvent event) {
 		Configuration.setConnectedTextures(!Configuration.isConnectedTextures());
 		Configuration.write();
-		
+
+		//TODO: Fixed TexturePackAPI.ChangeHandler.change()
 		TexturePackAPI.ChangeHandler.change();
 		if (Minecraft.theMinecraft.theWorld != null) {
 			Minecraft.theMinecraft.renderGlobal.updateAllRenderers();

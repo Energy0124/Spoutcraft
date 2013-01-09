@@ -1,12 +1,14 @@
 package net.minecraft.src;
 
-import org.spoutcraft.client.entity.CraftCreature; // Spout
-
 public abstract class EntityCreature extends EntityLiving {
-	public PathEntity pathToEntity; // Spout private -> public
-	
+	// Spout Start - private to public
+	public PathEntity pathToEntity;
+	// Spout End
+
 	/** The Entity this EntityCreature is set to attack. */
-	public Entity entityToAttack; // Spout protected -> public
+	// Spout Start - private to public
+	public Entity entityToAttack;
+	// Spout End
 
 	/**
 	 * returns true if a creature has attacked recently only used for creepers and skeletons
@@ -18,9 +20,6 @@ public abstract class EntityCreature extends EntityLiving {
 
 	public EntityCreature(World par1World) {
 		super(par1World);
-		// Spout Start
-		this.spoutEntity = new CraftCreature(this);
-		// Spout End
 	}
 
 	/**
@@ -235,17 +234,13 @@ public abstract class EntityCreature extends EntityLiving {
 	 * This method returns a value to be applied directly to entity speed, this factor is less than 1 when a slowdown
 	 * potion effect is applied, more than 1 when a haste potion effect is applied and 2 for fleeing entities.
 	 */
-	protected float getSpeedModifier() {
-		if (this.isAIEnabled()) {
-			return 1.0F;
-		} else {
-			float var1 = super.getSpeedModifier();
+	public float getSpeedModifier() {
+		float var1 = super.getSpeedModifier();
 
-			if (this.fleeingTick > 0) {
-				var1 *= 2.0F;
-			}
-
-			return var1;
+		if (this.fleeingTick > 0 && !this.isAIEnabled()) {
+			var1 *= 2.0F;
 		}
+
+		return var1;
 	}
 }

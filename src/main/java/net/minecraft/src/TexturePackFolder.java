@@ -16,7 +16,7 @@ public class TexturePackFolder extends TexturePackImplementation {
 	 */
 	public InputStream getResourceAsStream(String par1Str) {
 		try {
-			File var2 = new File(this.field_77548_a, par1Str.substring(1));
+			File var2 = new File(this.texturePackFile, par1Str.substring(1));
 
 			if (var2.exists()) {
 				return new BufferedInputStream(new FileInputStream(var2));
@@ -28,9 +28,9 @@ public class TexturePackFolder extends TexturePackImplementation {
 		return super.getResourceAsStream(par1Str);
 	}
 
-	// Spout HD Start
+	// MCPatcher Start
 	public File getFolder() {
-		return this.field_77548_a;
+		return this.texturePackFile;
 	}
-	// Spout HD End
+	// MCPatcher End
 }

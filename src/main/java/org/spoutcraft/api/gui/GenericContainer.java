@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.spoutcraft.api.UnsafeClass;
-import org.spoutcraft.api.addon.Addon;
 
 @UnsafeClass
 public class GenericContainer extends GenericWidget implements Container {
@@ -67,7 +66,7 @@ public class GenericContainer extends GenericWidget implements Container {
 		child.setAnchor(super.getAnchor());
 		// Relay out if we are already using layout - otherwise this will return immediately
 		if (getScreen() != null) {
-			Addon addon = child.getAddon();
+			String addon = child.getAddon();
 			getScreen().attachWidget(addon, child);
 		}
 		updateSize();

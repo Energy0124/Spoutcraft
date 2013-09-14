@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -189,7 +189,7 @@ public class Rectangle extends PropertyObject implements PropertyInterface, Anim
 
 	@Override
 	public String toString() {
-		return super.toString() + "{ x: "+x+" y: "+y+" width: "+width+" height: "+height+" }";
+		return super.toString() + "{ x: " + x + " y: " + y + " width: " + width + " height: " + height + " }";
 	}
 
 	public Rectangle clone() {

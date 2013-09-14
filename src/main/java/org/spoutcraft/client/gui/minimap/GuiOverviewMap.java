@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -23,7 +23,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.lwjgl.input.Mouse;
 
 import org.spoutcraft.api.Spoutcraft;
-import org.spoutcraft.api.addon.Addon;
 import org.spoutcraft.api.gui.Button;
 import org.spoutcraft.api.gui.Color;
 import org.spoutcraft.api.gui.Control;
@@ -42,7 +41,8 @@ import org.spoutcraft.client.gui.GuiSpoutScreen;
 
 public class GuiOverviewMap extends GuiSpoutScreen {
 	private MapWidget map;
-	private Label title, menuTitle;
+	private Boolean minimapEnabled;
+	private Label title, menuTitle, noRenderLabel;
 	private Button buttonDone, buttonWaypoint, buttonFocus, buttonCloseMenu, buttonZoomIn, buttonZoomOut, buttonShowPlayer, buttonReset, buttonSave, buttonDeathpoints;
 	private GenericScrollArea hoverMenu;
 
@@ -60,9 +60,9 @@ public class GuiOverviewMap extends GuiSpoutScreen {
 
 	@Override
 	protected void createInstances() {
-		Addon spoutcraft = Spoutcraft.getAddonManager().getAddon("Spoutcraft");
-
 		title = new GenericLabel("Overview Map");
+		noRenderLabel = new GenericLabel("The overview map will not work until the minimap is enabled.");
+		minimapEnabled = MinimapConfig.getInstance().isEnabled();
 		buttonDone = new GenericButton("Done");
 		buttonZoomIn = new GenericButton("+");
 		buttonZoomOut = new GenericButton("-");
@@ -74,7 +74,12 @@ public class GuiOverviewMap extends GuiSpoutScreen {
 		map = new MapWidget(this);
 		map.setGeometry(0, 0, width, height);
 		map.scrollTo(map.getPlayerPosition(), false, 0);
-		getScreen().attachWidgets(spoutcraft, map, title, buttonDone, buttonZoomIn, buttonZoomOut, buttonShowPlayer, buttonReset, buttonSave, buttonDeathpoints);
+
+		if (minimapEnabled == false) {
+			getScreen().attachWidgets("Spoutcraft", noRenderLabel, buttonDone);
+		} else {
+			getScreen().attachWidgets("Spoutcraft", map, title, buttonDone, buttonZoomIn, buttonZoomOut, buttonShowPlayer, buttonReset, buttonSave, buttonDeathpoints);
+		}
 
 		hoverMenu = new GenericScrollArea();
 		hoverMenu.setBackgroundColor(new Color(0x55ffffff));
@@ -84,16 +89,19 @@ public class GuiOverviewMap extends GuiSpoutScreen {
 		buttonFocus = new GenericButton("Set Focus");
 		buttonFocus.setTooltip("If a waypoint is in focus, the direction\nto it will be drawn on the minimap.");
 		buttonCloseMenu = new GenericButton("Close");
-		hoverMenu.attachWidgets(spoutcraft, buttonFocus, buttonWaypoint, buttonCloseMenu, menuTitle);
+		hoverMenu.attachWidgets("Spoutcraft", buttonFocus, buttonWaypoint, buttonCloseMenu, menuTitle);
 
 		setMenuVisible(false);
-		getScreen().attachWidget(spoutcraft, hoverMenu);
+		getScreen().attachWidget("Spoutcraft", hoverMenu);
 	}
 
 	@Override
 	protected void layoutWidgets() {
 		title.setX(width / 2 - SpoutClient.getHandle().fontRenderer.getStringWidth(title.getText()) / 2);
 		title.setY(5);
+
+		noRenderLabel.setX(width / 2 - SpoutClient.getHandle().fontRenderer.getStringWidth(noRenderLabel.getText()) / 2);
+		noRenderLabel.setY(height / 2);
 
 		map.setGeometry(0, 0, width, height);
 		map.setPriority(RenderPriority.Highest);
@@ -162,15 +170,13 @@ public class GuiOverviewMap extends GuiSpoutScreen {
 		}
 		if (btn == buttonSave) {
 			if (map.saveToDesktop()) {
-				Addon spoutcraft = Spoutcraft.getAddonManager().getAddon("Spoutcraft");
 				Label label = new FadingLabel("Saved to Desktop!", 500).setTextColor(new Color(0x7FFF00));
 				label.setGeometry(width / 2 - Spoutcraft.getMinecraftFont().getTextWidth(label.getText()) / 2, height / 2, 100, 12);
-				getScreen().attachWidgets(spoutcraft, label);
+				getScreen().attachWidgets("Spoutcraft", label);
 			} else {
-				Addon spoutcraft = Spoutcraft.getAddonManager().getAddon("Spoutcraft");
 				Label label = new FadingLabel("Failed to save Minimap!", 500).setTextColor(new Color(0xEE0000));
 				label.setGeometry(width / 2 - Spoutcraft.getMinecraftFont().getTextWidth(label.getText()) / 2, height / 2, 100, 12);
-				getScreen().attachWidgets(spoutcraft, label);
+				getScreen().attachWidgets("Spoutcraft", label);
 			}
 		}
 		if (btn == buttonDeathpoints) {

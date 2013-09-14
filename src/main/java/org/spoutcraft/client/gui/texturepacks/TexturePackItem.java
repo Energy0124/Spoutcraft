@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-import com.pclewis.mcpatcher.mod.TextureUtils;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.src.FontRenderer;
@@ -95,12 +94,13 @@ public class TexturePackItem implements ListWidgetItem {
 		font.drawStringWithShadow(pack.getSecondDescriptionLine(), x + 29, y + 20, 0xffaaaaaa);
 		String sTileSize;
 		if (tileSize != -1) {
-			sTileSize = ChatColor.GREEN + "" + tileSize + "x";
+			//ToDo:  Hide this until we come up with a way to calculate TileSize without building a sprite sheet for every texture pack in the texturepack folder.
+			//sTileSize = ChatColor.GREEN + "" + tileSize + "x";
 		} else {
-			sTileSize = ChatColor.YELLOW + "Calculating...";
+			//sTileSize = ChatColor.YELLOW + "Calculating...";
 		}
-		int w = font.getStringWidth(sTileSize);
-		font.drawStringWithShadow(sTileSize, width - 5 - w, y + 2, 0xffaaaaaa);
+		//int w = font.getStringWidth(sTileSize);
+		//font.drawStringWithShadow(sTileSize, width - 5 - w, y + 2, 0xffaaaaaa);
 
 		// TODO Show database information (author/member who posted it)
 
@@ -185,7 +185,7 @@ class TexturePackSizeThread extends Thread {
 
 	@Override
 	public void run() {
-		item.tileSize = TextureUtils.getTileSize(texturePack);
+		item.tileSize = TexturePackList.getTileSize(texturePack);
 		synchronized(TexturePackItem.texturePackSize) {
 			TexturePackItem.texturePackSize.put(getName(), item.tileSize);
 		}

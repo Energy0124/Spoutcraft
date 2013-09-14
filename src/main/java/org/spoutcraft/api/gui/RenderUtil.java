@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -33,18 +33,18 @@ public final class RenderUtil {
 	 */
 	public static void drawSymmetricalPolygon(float cx, float cy, float r, int numSegments) {
 		float theta = 2 * 3.1415926F / ((float)numSegments);
-		float c = (float) Math.cos(theta);//precalculate the sine and cosine
+		float c = (float) Math.cos(theta); // Precalculate the sine and cosine
 		float s = (float) Math.sin(theta);
 		float t;
 
-		float x = r;//we start at angle = 0
+		float x = r; // We start at angle = 0
 		float y = 0;
 
 		GL11.glBegin(GL11.GL_LINE_LOOP);
 		for (int ii = 0; ii < numSegments; ii++) {
-			GL11.glVertex2f(x + cx, y + cy);//output vertex
+			GL11.glVertex2f(x + cx, y + cy); // Output vertex
 
-			//apply the rotation matrix
+			// Apply the rotation matrix
 			t = x;
 			x = c * x - s * y;
 			y = s * t + c * y;

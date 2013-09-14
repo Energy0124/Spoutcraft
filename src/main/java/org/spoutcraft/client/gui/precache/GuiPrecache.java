@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -23,22 +23,19 @@ import net.minecraft.src.GuiScreen;
 import org.bukkit.ChatColor;
 
 import org.spoutcraft.api.Spoutcraft;
-import org.spoutcraft.api.addon.Addon;
 import org.spoutcraft.api.gui.GenericLabel;
 import org.spoutcraft.api.gui.WidgetAnchor;
 
 public class GuiPrecache extends GuiScreen {
-
 	public GenericLabel statusText;
 
 	@Override
 	public void initGui() {
-		Addon spoutcraft = Spoutcraft.getAddonManager().getAddon("Spoutcraft");
 		statusText = new GenericLabel();
 		statusText.setAnchor(WidgetAnchor.CENTER_CENTER);
 		statusText.setAlign(WidgetAnchor.CENTER_CENTER);
-		statusText.setText(ChatColor.BLUE + "Spoutcraft" + "\n"+" "+ "\n"+ ChatColor.WHITE + "Verifying Custom Resources");
-		getScreen().attachWidget(spoutcraft, statusText);
+		statusText.setText(ChatColor.BLUE + "Spoutcraft" + "\n" + " " + "\n" + ChatColor.WHITE + "Loading terrain and custom resources" + "\n" + "\n" + ChatColor.MAGIC + "ShowMagic");
+		getScreen().attachWidgets("Spoutcraft", statusText);
 	}
 
 	@Override

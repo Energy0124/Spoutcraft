@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -19,14 +19,19 @@
  */
 package org.spoutcraft.client.gui.settings.controls;
 
-import org.spoutcraft.api.event.screen.SliderDragEvent;
 import org.spoutcraft.api.gui.GenericSlider;
+import org.spoutcraft.client.SpoutClient;
 import org.spoutcraft.client.config.Configuration;
 
 public class FlightSpeedSlider extends GenericSlider {
 	public FlightSpeedSlider() {
 		super("Flight Speed");
-		this.setSliderPosition(Configuration.getFlightSpeedFactor() / 10);
+		setEnabled(SpoutClient.getInstance().isFlySpeedCheat());
+		if (SpoutClient.getInstance().isFlySpeedCheat()) {
+			this.setSliderPosition(Configuration.getFlightSpeedFactor() / 10);
+		} else {
+			this.setSliderPosition(1.0F / 10);
+		}
 		setTooltip("Flight Speed Multiplier\nAlters how fast you fly in creative. 1X is vanilla speed.");
 	}
 
@@ -37,8 +42,8 @@ public class FlightSpeedSlider extends GenericSlider {
 	}
 
 	@Override
-	public void onSliderDrag(SliderDragEvent event) {
-		Configuration.setFlightSpeedFactor(event.getNewPosition() * 10);
+	public void onSliderDrag(float old, float newPos) {
+		Configuration.setFlightSpeedFactor(newPos * 10);
 		Configuration.write();
 	}
 }

@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -119,13 +119,10 @@ public class PollResult {
 	}
 
 	public void poll() {
-		boolean wasSandboxed = SpoutClient.isSandboxed();
-		if (wasSandboxed) SpoutClient.disableSandbox();
 		if (!isPolling()) {
 			currentThread = new PollThread();
 			currentThread.start();
 		}
-		if (wasSandboxed) SpoutClient.enableSandbox();
 	}
 
 	public static PollResult getPoll(String ip, int port, int uid) {
@@ -279,17 +276,13 @@ public class PollResult {
 	}
 
 	/**
-	 * Sends ping, playercount and maximum players to the server list database.
+	 * Sends ping, player count, and maximum players to the server list database.
 	 * No personal data (aside your IP) will be transferred and the IP won't be
 	 * saved. Sending this data to the server makes for a more accurate ping calculation
 	 * and will give you better search results when you order by ping. Our server then
 	 * doesn't have to ping all the servers on its own.
 	 */
 	protected static void sendDCData() {
-		boolean wasSandboxed = SpoutClient.isSandboxed();
-		if (wasSandboxed) {
-			SpoutClient.disableSandbox();
-		}
 		if (send != null) {
 			return;
 		}
@@ -302,7 +295,7 @@ public class PollResult {
 						return;
 					}
 				}
-				String api = MirrorUtils.getMirrorUrl("/senddata.php", "http://servers.spout.org/senddata.php");
+				String api = MirrorUtils.getMirrorUrl("senddata.php", "http://servers.spout.org/senddata.php");
 				String json = "{";
 				int res = 0;
 				for (PollResult result:recentResults.valueCollection()) {
@@ -360,8 +353,5 @@ public class PollResult {
 			}
 		};
 		send.start();
-		if (wasSandboxed) {
-			SpoutClient.enableSandbox();
-		}
 	}
 }

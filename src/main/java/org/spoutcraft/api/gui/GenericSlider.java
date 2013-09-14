@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -23,7 +23,6 @@ import java.io.IOException;
 
 import org.spoutcraft.api.Spoutcraft;
 import org.spoutcraft.api.UnsafeClass;
-import org.spoutcraft.api.event.screen.SliderDragEvent;
 import org.spoutcraft.api.io.SpoutInputStream;
 import org.spoutcraft.api.io.SpoutOutputStream;
 
@@ -99,12 +98,12 @@ public class GenericSlider extends GenericControl implements Slider {
 		return this;
 	}
 
+	public void onSliderDrag(float oldPos, float newPos) {
+	}
+
 	@Override
 	public Slider copy() {
 		return ((Slider)super.copy()).setSliderPosition(getSliderPosition());
-	}
-
-	public void onSliderDrag(SliderDragEvent event) {
 	}
 
 	public String getText() {

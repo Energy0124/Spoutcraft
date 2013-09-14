@@ -2,27 +2,27 @@ package net.minecraft.src;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.nio.IntBuffer;
+//Spout Start - Unused import
+//import java.nio.IntBuffer;
+//Spout End
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.imageio.ImageIO;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 // Spout Start
+//import org.lwjgl.opengl.GL12; // Unused import
 import java.nio.ByteBuffer;
-import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.EXTFramebufferObject;
-import net.minecraft.client.Minecraft;
-import org.spoutcraft.client.config.Configuration;
 // Spout End
 
 public class ScreenShotHelper {
 	private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss");
 	// Spout Start - Moved to local variables
-	/*private static IntBuffer field_74293_b;
-	private static int[] field_74294_c;*/
+	/*
+	private static IntBuffer field_74293_b;
+	private static int[] field_74294_c;
+	*/
 	// Spout End
 
 	/**

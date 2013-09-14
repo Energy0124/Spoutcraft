@@ -154,7 +154,7 @@ public class Packet51MapChunk extends Packet {
 		return 17 + this.tempLength;
 	}
 
-	public byte[] func_73593_d() {
+	public byte[] getCompressedChunkData() {
 		return this.compressedChunkData;
 	}
 
@@ -166,7 +166,7 @@ public class Packet51MapChunk extends Packet {
 		byte[] var7 = temp;
 
 		if (par1) {
-			par0Chunk.deferRender = true;
+			par0Chunk.sendUpdates = true;
 		}
 
 		int var8;

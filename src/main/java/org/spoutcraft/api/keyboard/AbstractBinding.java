@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -108,7 +108,7 @@ public abstract class AbstractBinding {
 			case 2:
 				return "Middle button";
 			default:
-				return "Button "+button;
+				return "Button " + button;
 		}
 	}
 

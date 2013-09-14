@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -20,7 +20,6 @@
 package org.spoutcraft.api.gui;
 
 import org.spoutcraft.api.UnsafeClass;
-import org.spoutcraft.api.event.screen.TextFieldChangeEvent;
 
 @UnsafeClass
 public interface TextField extends Control {
@@ -166,7 +165,7 @@ public interface TextField extends Control {
 	 * This event will also be sent to the screen listener
 	 * @param event
 	 */
-	public void onTextFieldChange(TextFieldChangeEvent event);
+	public void onTextFieldChange();
 
 	/**
 	 * Fires when the user presses Enter.

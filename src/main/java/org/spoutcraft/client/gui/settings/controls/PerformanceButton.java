@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -23,7 +23,6 @@ import org.lwjgl.opengl.Display;
 
 import net.minecraft.client.Minecraft;
 
-import org.spoutcraft.api.event.screen.ButtonClickEvent;
 import org.spoutcraft.client.config.Configuration;
 
 public class PerformanceButton extends AutomatedButton {
@@ -43,7 +42,7 @@ public class PerformanceButton extends AutomatedButton {
 	}
 
 	@Override
-	public void onButtonClick(ButtonClickEvent event) {
+	public void onButtonClick() {
 		Configuration.setPerformance(Configuration.getPerformance() + 1);
 		Configuration.setPerformance(Configuration.getPerformance() & 3);
 		Configuration.write();

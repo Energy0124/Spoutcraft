@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -27,10 +27,12 @@ import org.spoutcraft.api.io.SpoutInputStream;
 import org.spoutcraft.api.io.SpoutOutputStream;
 import org.spoutcraft.client.SpoutClient;
 import org.spoutcraft.client.gui.CustomScreen;
+import org.spoutcraft.client.gui.precache.GuiPrecache;
 import org.spoutcraft.client.io.FileDownloadThread;
 
 public class PacketPreCacheCompleted implements SpoutPacket {
 	public PacketPreCacheCompleted() {
+		System.out.println("[Spoutcraft Cache Manager] Completed: " + System.currentTimeMillis());
 	}
 
 	public int getNumBytes() {
@@ -47,6 +49,12 @@ public class PacketPreCacheCompleted implements SpoutPacket {
 		FileDownloadThread.preCacheCompleted.set(System.currentTimeMillis());
 		SpoutClient.getInstance().getPacketManager().sendSpoutPacket(this);
 		if (!(SpoutClient.getHandle().currentScreen instanceof CustomScreen) && !(SpoutClient.getHandle().currentScreen instanceof GuiYesNo)) {
+			// Closes downloading terrain
+			SpoutClient.getHandle().displayGuiScreen(null, false);
+			// Prevent closing a plugin created menu from opening the downloading terrain
+			SpoutClient.getHandle().clearPreviousScreen();
+		}
+		if (SpoutClient.getHandle().currentScreen instanceof GuiPrecache) {
 			// Closes downloading terrain
 			SpoutClient.getHandle().displayGuiScreen(null, false);
 			// Prevent closing a plugin created menu from opening the downloading terrain

@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -75,7 +75,7 @@ public class ServerItem implements ListWidgetItem {
 
 	private static final String latestMC = "1.4.7";
 	protected String mcversion = latestMC;
-	private boolean showPing = false;
+	public boolean showPing = false;
 
 	public ServerItem clone() {
 		ServerItem clone = new ServerItem(getTitle(), getIp(), getPort(), getDatabaseId(),  mcversion);
@@ -133,7 +133,7 @@ public class ServerItem implements ListWidgetItem {
 			String iconUrl = "http://cdn.spout.org/server/thumb/" + databaseId + ".png";
 			Texture icon = CustomTextureManager.getTextureFromUrl("Spoutcraft", iconUrl);
 			if (icon == null) {
-				CustomTextureManager.downloadTexture(iconUrl, true);
+				CustomTextureManager.downloadTexture("Spoutcraft", iconUrl, true);
 				icon = CustomTextureManager.getTextureFromJar("/res/icon/unknown_server.png");
 			}
 			GL11.glPushMatrix();
@@ -151,7 +151,6 @@ public class ServerItem implements ListWidgetItem {
 		int margin1 = 0;
 		int margin2 = 0;
 
-
 		if (getPing() > 0 && (!isPolling() || showPingWhilePolling)) {
 			if (isShowPing()) {
 				String sping = getPing() + " ms";
@@ -164,7 +163,6 @@ public class ServerItem implements ListWidgetItem {
 			margin2 = playerswidth;
 			font.drawStringWithShadow(sPlayers, x + width - playerswidth - 2, y + 11, 0xaaaaaa);
 		}
-
 
 		font.drawStringWithShadow(r.getFittingText(title, width - margin1 - marginleft), x + marginleft, y + 2, 0xffffff);
 		String sMotd = "";
@@ -227,7 +225,7 @@ public class ServerItem implements ListWidgetItem {
 			}
 		}
 		if (isShowPing()) {
-			SpoutClient.getHandle().renderEngine.bindTexture(SpoutClient.getHandle().renderEngine.getTexture("/gui/icons.png"));
+			SpoutClient.getHandle().renderEngine.bindTexture("/gui/icons.png");
 			RenderUtil.drawTexturedModalRectangle(x + width - 2 - 10, y + 2, 0 + xOffset * 10, 176 + yOffset * 8, 10, 8, 0f);
 		}
 		if (port != DEFAULT_PORT) {
@@ -273,27 +271,33 @@ public class ServerItem implements ListWidgetItem {
 			GL11.glPopMatrix();
 			iconMargin += 5 + 7;
 		}
-		
-		if (pollResult.getVersion() != null) {	
-			GL11.glPushMatrix();			
+
+		if (pollResult.getVersion() != null) {
+			GL11.glPushMatrix();
 			versionWidth = font.getStringWidth("1.0.0");
-			font.drawStringWithShadow(pollResult.getVersion(), x + width - versionWidth - 20, y + 21, 0x00FF00);			
+				if (isCompatible(SpoutClient.spoutcraftVersion)) {
+					font.drawStringWithShadow(pollResult.getVersion(), x + width - versionWidth - 20, y + 21, 0x00FF00);
+				} else {
+					font.drawStringWithShadow(pollResult.getVersion(), x + width - versionWidth - 20, y + 21, 0xF44607);
+				}
 			GL11.glPopMatrix();
 		} else {
-			GL11.glPushMatrix();			
+			GL11.glPushMatrix();
 			versionWidth = font.getStringWidth("Unknown");
-			font.drawStringWithShadow("Unknown", x + width - versionWidth - 20, y + 21, 0xFF0000);			
+			font.drawStringWithShadow("Unknown", x + width - versionWidth - 20, y + 21, 0xFF0000);
 			GL11.glPopMatrix();
 		}
 	}
 
 	public void onClick(int x, int y, boolean doubleClick) {
 		if (doubleClick) {
-			if (databaseId != -1) {
-				String url = MirrorUtils.getMirrorUrl("/popular.php?uid=", "http://servers.spout.org/popular.php?uid=");
-				NetworkUtils.pingUrl(url + databaseId);
+			if (isCompatible(SpoutClient.spoutcraftVersion)) {
+				if (databaseId != -1) {
+					String url = MirrorUtils.getMirrorUrl("/popular.php?uid=", "http://servers.spout.org/popular.php?uid=");
+					NetworkUtils.pingUrl(url + databaseId);
+				}
+				SpoutClient.getInstance().getServerManager().join(this, isFavorite?favorites.getCurrentGui():serverList.getCurrentGui(), isFavorite?"Favorites":"Server List");
 			}
-			SpoutClient.getInstance().getServerManager().join(this, isFavorite?favorites.getCurrentGui():serverList.getCurrentGui(), isFavorite?"Favorites":"Server List");
 		}
 	}
 
@@ -360,6 +364,14 @@ public class ServerItem implements ListWidgetItem {
 		return pollResult.getMaxPlayers();
 	}
 
+	public String getVersion() {
+		String version = pollResult.getVersion();
+		if (version != null) {
+			return version;
+		} 
+		return "0.0.0";				
+	}
+	
 	public void setCountry(String country) {
 		this.country = country;
 	}
@@ -398,5 +410,22 @@ public class ServerItem implements ListWidgetItem {
 
 	public void setAcceptsTextures(boolean acceptsTextures) {
 		this.acceptsTextures = acceptsTextures;
+	}
+	
+	public boolean isCompatible(String version) {
+		// Update the following method to allow users to login to server based on conditional versioning response.		
+		if (version.equals("1.5.2")) {
+			if (getVersion().equals("1.5")) {
+				return false;
+			}
+			if (getVersion().equals("1.5.1")) {
+				return false;
+			}
+			
+			if (getVersion().equals("1.5.2")) {
+				return true;
+			}			
+		}
+		return false;
 	}
 }

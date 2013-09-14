@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -96,8 +96,8 @@ public class PacketCustomBlockChunkOverride implements CompressablePacket {
 				customIds[i] = buffer.getShort(i * 3);
 				customData[i] = buffer.get((i * 3) + 2);
 			}
-			Spoutcraft.getWorld().getChunkAt(chunkX, chunkZ).setCustomBlockIds(customIds);
-			Spoutcraft.getWorld().getChunkAt(chunkX, chunkZ).setCustomBlockData(customData);
+			Spoutcraft.getChunk(SpoutClient.getInstance().getRawWorld(), chunkX, chunkZ).setCustomBlockIds(customIds);
+			Spoutcraft.getChunk(SpoutClient.getInstance().getRawWorld(), chunkX, chunkZ).setCustomBlockData(customData);
 			thread.queue.add(new LightingData(chunkX, chunkZ, customIds));
 		}
 	}
@@ -176,7 +176,7 @@ class LightingThread extends Thread {
 
 	@Override
 	public void run() {
-		while(!this.isInterrupted()) {
+		while (!this.isInterrupted()) {
 			try {
 				LightingData data = queue.take();
 				World world = SpoutClient.getHandle().theWorld;

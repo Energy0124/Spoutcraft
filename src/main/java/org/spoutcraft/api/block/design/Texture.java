@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -22,18 +22,16 @@ package org.spoutcraft.api.block.design;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.spoutcraft.api.addon.Addon;
-
 public class Texture {
 	public String texture;
-	public Addon addon;
+	public String addon;
 	public int width;
 	public int height;
 	public int spriteSize;
 
 	public List<SubTexture> subTextures;
 
-	public Texture(Addon addon, String texture, int width, int height, int spriteSize) {
+	public Texture(String addon, String texture, int width, int height, int spriteSize) {
 		this.texture = texture;
 		this.addon = addon;
 		this.width = width;
@@ -73,7 +71,7 @@ public class Texture {
 		return height;
 	}
 
-	public Addon getAddon() {
+	public String getAddon() {
 		return addon;
 	}
 }

@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -95,9 +95,6 @@ public abstract class AbstractAPIModel extends AbstractListModel {
 
 	public void refreshAPIData(final String url, final int page, final boolean clear) {
 		currentUrl = url;
-		boolean wasSandboxed = SpoutClient.isSandboxed();
-		if (wasSandboxed) SpoutClient.disableSandbox();
-
 		if (currentLoader != null && currentLoader.isAlive()) {
 			currentLoader.interrupt();
 			System.out.println("Stopped previous loading");
@@ -150,9 +147,6 @@ public abstract class AbstractAPIModel extends AbstractListModel {
 			}
 		};
 		currentLoader.start();
-		if (wasSandboxed) {
-			SpoutClient.enableSandbox();
-		}
 	}
 
 	public void clear() {

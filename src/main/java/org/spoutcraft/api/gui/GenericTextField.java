@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -23,7 +23,6 @@ import java.io.IOException;
 
 import org.spoutcraft.api.Spoutcraft;
 import org.spoutcraft.api.UnsafeClass;
-import org.spoutcraft.api.event.screen.TextFieldChangeEvent;
 import org.spoutcraft.api.io.SpoutInputStream;
 import org.spoutcraft.api.io.SpoutOutputStream;
 
@@ -198,9 +197,6 @@ public class GenericTextField extends GenericControl implements TextField {
 		return ((TextField) super.copy()).setText(getText()).setCursorPosition(getCursorPosition()).setMaximumCharacters(getMaximumCharacters()).setFieldColor(getFieldColor()).setBorderColor(getBorderColor()).setMaximumLines(getMaximumLines()).setTabIndex(getTabIndex()).setPasswordField(isPasswordField()).setPlaceholder(getPlaceholder());
 	}
 
-	public void onTextFieldChange(TextFieldChangeEvent event) {
-	}
-
 	public void onTypingFinished() {
 	}
 
@@ -223,5 +219,9 @@ public class GenericTextField extends GenericControl implements TextField {
 	public Widget setGeometry(int x, int y, int width, int height) {
 		textProcessor.setWidth(width);
 		return super.setGeometry(x, y, width, height);
+	}
+
+	@Override
+	public void onTextFieldChange() {
 	}
 }

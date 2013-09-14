@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -24,6 +24,7 @@ import java.awt.image.BufferedImage;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
+import org.spoutcraft.client.SpoutClient;
 
 public class ImageManager {
 	protected final BufferedImage image;
@@ -72,7 +73,7 @@ public class ImageManager {
 				hasGLImage = true;
 				hasChanged = false;
 			} else if (glImage > 0) {
-				GL11.glBindTexture(GL11.GL_TEXTURE_2D, glImage);
+				SpoutClient.getHandle().renderEngine.bindTexture(glImage);
 			}
 		}
 	}

@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -26,17 +26,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.lwjgl.input.Keyboard;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.introspector.BeanAccess;
 
 import net.minecraft.src.Block;
-import net.minecraft.src.BlockWorkbench;
 import net.minecraft.src.GuiScreen;
+import net.minecraft.src.GuiChat;
 
 import org.spoutcraft.api.Spoutcraft;
 import org.spoutcraft.api.gui.ScreenType;
@@ -132,10 +130,6 @@ public class SimpleKeyBindingManager implements KeyBindingManager {
 	}
 
 	public void save() {
-		boolean wasSandboxed = SpoutClient.isSandboxed();
-		if (wasSandboxed) {
-			SpoutClient.disableSandbox();
-		}
 		Yaml yaml = new Yaml();
 		yaml.setBeanAccess(BeanAccess.FIELD); // To ignore transient fields
 		try {
@@ -169,9 +163,6 @@ public class SimpleKeyBindingManager implements KeyBindingManager {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		if (wasSandboxed) {
-			SpoutClient.enableSandbox();
-		}
 	}
 
 	private File getBindingsFile() throws IOException {
@@ -192,10 +183,6 @@ public class SimpleKeyBindingManager implements KeyBindingManager {
 
 	@SuppressWarnings("unchecked")
 	public void load() {
-		boolean wasSandboxed = SpoutClient.isSandboxed();
-		if (wasSandboxed) {
-			SpoutClient.disableSandbox();
-		}
 		Yaml yaml = new Yaml();
 		try {
 			bindings = new ArrayList<KeyBinding>();
@@ -252,9 +239,6 @@ public class SimpleKeyBindingManager implements KeyBindingManager {
 			e.printStackTrace();
 			shortcuts = new ArrayList<Shortcut>();
 		}
-		if (wasSandboxed) {
-			SpoutClient.enableSandbox();
-		}
 		updateBindings();
 	}
 
@@ -278,7 +262,10 @@ public class SimpleKeyBindingManager implements KeyBindingManager {
 				GuiScreen parent = SpoutClient.getHandle().currentScreen;
 				SpoutClient.getHandle().displayGuiScreen(new GuiAmbigousInput(effective, parent));
 			} else {
-				Spoutcraft.getActivePlayer().showAchievement("Multiple Bindings ...", "are assigned to Key " + Keyboard.getKeyName(key), Block.workbench.blockID);
+				GuiScreen parent = SpoutClient.getHandle().currentScreen;
+				if (!(parent instanceof GuiChat)) {
+					Spoutcraft.getActivePlayer().showAchievement("Multiple Bindings ...", "are assigned to Key " + Keyboard.getKeyName(key), Block.workbench.blockID);
+				}
 			}
 		}
 	}

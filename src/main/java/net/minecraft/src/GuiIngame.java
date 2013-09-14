@@ -1,6 +1,8 @@
 package net.minecraft.src;
 
 import java.awt.Color;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import net.minecraft.client.Minecraft;
@@ -8,15 +10,14 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 // Spout Start
 import org.lwjgl.opengl.GL11;
+import org.spoutcraft.api.gui.InGameHUD;
+import org.spoutcraft.api.Spoutcraft;
+import org.spoutcraft.api.material.MaterialData;
 import org.spoutcraft.client.SpoutClient;
+import org.spoutcraft.client.inventory.CraftItemStack;
 import org.spoutcraft.client.chunkcache.ChunkNetCache;
 import org.spoutcraft.client.config.Configuration;
 import org.spoutcraft.client.gui.minimap.ZanMinimap;
-import org.spoutcraft.api.Spoutcraft;
-import org.spoutcraft.api.gui.ChatTextBox;
-import org.spoutcraft.api.gui.InGameHUD;
-import org.spoutcraft.api.gui.ServerPlayerList;
-import org.spoutcraft.api.player.ChatMessage;
 // Spout End
 
 public class GuiIngame extends Gui {
@@ -39,8 +40,12 @@ public class GuiIngame extends Gui {
 
 	/** Previous frame vignette brightness (slowly changes by 1% each frame) */
 	public float prevVignetteBrightness = 1.0F;
-	private int field_92017_k;
-	private ItemStack field_92016_l;
+
+	/** Remaining ticks the item highlight should be visible */
+	private int remainingHighlightTicks;
+
+	/** The ItemStack that is currently being highlighted */
+	private ItemStack highlightingItemStack;
 
 	public GuiIngame(Minecraft par1Minecraft) {
 		this.mc = par1Minecraft;
@@ -92,12 +97,12 @@ public class GuiIngame extends Gui {
 		}
 		GL11.glBlendFunc(770, 771);
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-		GL11.glBindTexture(3553 /* GL_TEXTURE_2D */, this.mc.renderEngine.getTexture("/gui/gui.png"));
+		this.mc.renderEngine.bindTexture("/gui/gui.png");
 		InventoryPlayer var11 = this.mc.thePlayer.inventory;
 		this.zLevel = -90.0F;
 		this.drawTexturedModalRect(screenWidth / 2 - 91, screenHeight - 22, 0, 0, 182, 22);
 		this.drawTexturedModalRect(screenWidth / 2 - 91 - 1 + var11.currentItem * 20, screenHeight - 22 - 1, 0, 22, 24, 22);
-		GL11.glBindTexture(3553 /* GL_TEXTURE_2D */, this.mc.renderEngine.getTexture("/gui/icons.png"));
+		this.mc.renderEngine.bindTexture("/gui/icons.png");
 		GL11.glEnable(3042 /* GL_BLEND */);
 		GL11.glBlendFunc(775, 769);
 		this.drawTexturedModalRect(screenWidth / 2 - 7, screenHeight / 2 - 7, 0, 0, 16, 16);
@@ -108,10 +113,6 @@ public class GuiIngame extends Gui {
 		int var17;
 
 		this.renderBossHealth();
-
-		// Better safe than sorry
-		SpoutClient.enableSandbox();
-
 		// Toggle visibility if needed
 		if (needsUpdate && mainScreen.getHealthBar().isVisible() == mc.playerController.isInCreativeMode()) {
 			mainScreen.toggleSurvivalHUD(!mc.playerController.isInCreativeMode());
@@ -137,8 +138,6 @@ public class GuiIngame extends Gui {
 		// Exp Bar Begin
 		mainScreen.getExpBar().render();
 		// Exp Bar End
-
-		SpoutClient.disableSandbox();
 
 		map.onRenderTick();
 
@@ -174,14 +173,12 @@ public class GuiIngame extends Gui {
 			GL11.glEnable(2929 /*GL_DEPTH_TEST*/);
 		}
 
-		SpoutClient.enableSandbox();
 		mainScreen.render();
-		SpoutClient.disableSandbox();
 		if (this.mc.gameSettings.showDebugInfo) {
 			this.mc.mcProfiler.startSection("debug");
 			GL11.glPushMatrix();
 			if (Configuration.getFastDebug() != 2) {
-				font.drawStringWithShadow("Minecraft 1.4.7 (" + this.mc.debug + ")", 2, 2, 16777215);
+				font.drawStringWithShadow("Minecraft 1.5.2 (" + this.mc.debug + ")", 2, 2, 16777215);
 				font.drawStringWithShadow(this.mc.debugInfoRenders(), 2, 12, 16777215);
 				font.drawStringWithShadow(this.mc.getEntityDebug(), 2, 22, 16777215);
 				font.drawStringWithShadow(this.mc.debugInfoEntities(), 2, 32, 16777215);
@@ -194,22 +191,24 @@ public class GuiIngame extends Gui {
 				this.drawString(font, var45, screenWidth - font.getStringWidth(var45) - 2, 2, 14737632);
 				var45 = "Allocated memory: " + var34 * 100L / var41 + "% (" + var34 / 1024L / 1024L + "MB)";
 				this.drawString(font, var45, screenWidth - font.getStringWidth(var45) - 2, 12, 14737632);
-				if(SpoutClient.getInstance().isCoordsCheat()) {
-					this.drawString(font, String.format("x: %.5f", new Object[] {Double.valueOf(this.mc.thePlayer.posX)}), 2, 64, 14737632);
-					this.drawString(font, String.format("y: %.3f (feet pos, %.3f eyes pos)", new Object[] {Double.valueOf(this.mc.thePlayer.boundingBox.minY), Double.valueOf(this.mc.thePlayer.posY)}), 2, 72, 14737632);
-					this.drawString(font, String.format("z: %.5f", new Object[] {Double.valueOf(this.mc.thePlayer.posZ)}), 2, 80, 14737632);
-					this.drawString(font, "f: " + (MathHelper.floor_double((double)(this.mc.thePlayer.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3), 2, 88, 14737632);
-				}
 				int var47 = MathHelper.floor_double(this.mc.thePlayer.posX);
 				int var22 = MathHelper.floor_double(this.mc.thePlayer.posY);
-				int var233 = MathHelper.floor_double(this.mc.thePlayer.posZ);
-
-				if (this.mc.theWorld != null && this.mc.theWorld.blockExists(var47, var22, var233)) {
-					Chunk var48 = this.mc.theWorld.getChunkFromBlockCoords(var47, var233);
-					this.drawString(font, "lc: " + (var48.getTopFilledSegment() + 15) + " b: " + var48.getBiomeGenForWorldCoords(var47 & 15, var233 & 15, this.mc.theWorld.getWorldChunkManager()).biomeName + " bl: " + var48.getSavedLightValue(EnumSkyBlock.Block, var47 & 15, var22, var233 & 15) + " sl: " + var48.getSavedLightValue(EnumSkyBlock.Sky, var47 & 15, var22, var233 & 15) + " rl: " + var48.getBlockLightValue(var47 & 15, var22, var233 & 15, 0), 2, 96, 14737632);
+				int var23 = MathHelper.floor_double(this.mc.thePlayer.posZ);
+				if(SpoutClient.getInstance().isCoordsCheat()) {
+					this.drawString(font, String.format("x: %.5f (%d) // c: %d (%d)", new Object[] {Double.valueOf(this.mc.thePlayer.posX), Integer.valueOf(var47), Integer.valueOf(var47 >> 4), Integer.valueOf(var47 & 15)}), 2, 64, 14737632);
+					this.drawString(font, String.format("y: %.3f (feet pos, %.3f eyes pos)", new Object[] {Double.valueOf(this.mc.thePlayer.boundingBox.minY), Double.valueOf(this.mc.thePlayer.posY)}), 2, 72, 14737632);
+					this.drawString(font, String.format("z: %.5f (%d) // c: %d (%d)", new Object[] {Double.valueOf(this.mc.thePlayer.posZ), Integer.valueOf(var23), Integer.valueOf(var23 >> 4), Integer.valueOf(var23 & 15)}), 2, 80, 14737632);
+					int var24 = MathHelper.floor_double((double)(this.mc.thePlayer.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
+					this.drawString(font, "f: " + var24 + " (" + Direction.directions[var24] + ") / " + MathHelper.wrapAngleTo180_float(this.mc.thePlayer.rotationYaw), 2, 88, 14737632);
 				}
 
-				this.drawString(font, String.format("ws: %.3f, fs: %.3f, g: %b", new Object[] {Float.valueOf(this.mc.thePlayer.capabilities.getWalkSpeed()), Float.valueOf(this.mc.thePlayer.capabilities.getFlySpeed()), Boolean.valueOf(this.mc.thePlayer.onGround)}), 2, 104, 14737632);
+				if (this.mc.theWorld != null && this.mc.theWorld.blockExists(var47, var22, var23)) {
+					Chunk var48 = this.mc.theWorld.getChunkFromBlockCoords(var47, var23);
+					this.drawString(font, "lc: " + (var48.getTopFilledSegment() + 15) + " b: " + var48.getBiomeGenForWorldCoords(var47 & 15, var23 & 15, this.mc.theWorld.getWorldChunkManager()).biomeName + " bl: " + var48.getSavedLightValue(EnumSkyBlock.Block, var47 & 15, var22, var23 & 15) + " sl: " + var48.getSavedLightValue(EnumSkyBlock.Sky, var47 & 15, var22, var23 & 15) + " rl: " + var48.getBlockLightValue(var47 & 15, var22, var23 & 15, 0), 2, 96, 14737632);
+				}
+
+				this.drawString(font, String.format("ws: %.3f, fs: %.3f, g: %b, fl: %d", new Object[] {Float.valueOf(this.mc.thePlayer.capabilities.getWalkSpeed()), Float.valueOf(this.mc.thePlayer.capabilities.getFlySpeed()), Boolean.valueOf(this.mc.thePlayer.onGround), Integer.valueOf(this.mc.theWorld.getHeightValue(var47, var23))}), 2, 104, 14737632);
+
 				// Spout Start
 				boolean cacheInUse = ChunkNetCache.cacheInUse.get();
 				int y = 115;
@@ -265,20 +264,82 @@ public class GuiIngame extends Gui {
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glDisable(GL11.GL_ALPHA_TEST);
 		GL11.glPushMatrix();
+
+		int var12;
+		int var13;
+		int var38;
+
+		if (Configuration.showHotbarText) {
+			String var35;
+			String custom = null;
+			var12 = this.mc.thePlayer.getHealth();
+			var13 = this.mc.thePlayer.prevHealth;
+			String var34 = "" + this.mc.thePlayer.experienceLevel;
+			var38 = (screenWidth - font.getStringWidth(var34)) / 2;
+			this.mc.mcProfiler.startSection("toolHighlight");
+
+			if (this.remainingHighlightTicks > 0 && this.highlightingItemStack != null) {
+				if (this.highlightingItemStack.itemID == MaterialData.flint.getRawId()) {
+					custom = Spoutcraft.getMaterialManager().getToolTip(new CraftItemStack(this.highlightingItemStack));
+				}
+				if (custom != null) {
+					var35 = custom;
+				} else {
+					var35 = this.highlightingItemStack.getDisplayName();
+				}
+				var12 = (screenWidth - font.getStringWidth(var35)) / 2;
+				var13 = screenHeight - 59;
+
+				if (!mainScreen.getHungerBar().isVisible() || !mainScreen.getHealthBar().isVisible()) {
+					var13 += 8;
+				}
+				if (!mainScreen.getArmorBar().isVisible()) {
+					var13 += 8;
+				}
+
+				if (!mainScreen.getExpBar().isVisible()) {
+					var13 += 6;
+				}
+
+				var38 = (int)((float)this.remainingHighlightTicks * 256.0F / 10.0F);
+
+				if (var38 > 255) {
+					var38 = 255;
+				}
+
+				if (var38 > 0) {
+					GL11.glPushMatrix();
+					GL11.glEnable(GL11.GL_BLEND);
+					GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+					font.drawStringWithShadow(var35, var12, var13, 16777215 + (var38 << 24));
+					GL11.glDisable(GL11.GL_BLEND);
+					GL11.glPopMatrix();
+				}
+			}
+
+			this.mc.mcProfiler.endSection();
+		}
+
+		ScoreObjective var42 = this.mc.theWorld.getScoreboard().func_96539_a(1);
+
+		if (var42 != null) {
+			this.func_96136_a(var42, screenHeight, screenWidth, font);
+		}
+		
 		GL11.glTranslatef(0.0F, (float)(screenHeight - 48), 0.0F);
 		this.mc.mcProfiler.startSection("chat");
 		this.persistantChatGUI.drawChat(this.updateCounter);
 		this.mc.mcProfiler.endSection();
 		GL11.glPopMatrix();
-
+		var42 = this.mc.theWorld.getScoreboard().func_96539_a(0);
+		
 		if (this.mc.gameSettings.keyBindPlayerList.pressed && (!this.mc.isIntegratedServerRunning() || this.mc.thePlayer.sendQueue.playerInfoList.size() > 1)) {
 			this.mc.mcProfiler.startSection("playerList");
 			NetClientHandler var37 = this.mc.thePlayer.sendQueue;
 			List var39 = var37.playerInfoList;
-			int var13 = var37.currentServerMaxPlayers;
+			var13 = var37.currentServerMaxPlayers;
 			int var40 = var13;
 
-			int var38;
 			for (var38 = 1; var40 > 20; var40 = (var13 + var38 - 1) / var38) {
 				++var38;
 			}
@@ -302,7 +363,23 @@ public class GuiIngame extends Gui {
 
 				if (var19 < var39.size()) {
 					GuiPlayerInfo var46 = (GuiPlayerInfo)var39.get(var19);
-					font.drawStringWithShadow(var46.name, var20, var47, 16777215);
+					ScorePlayerTeam var60 = this.mc.theWorld.getScoreboard().getPlayersTeam(var46.name);
+					String var53 = ScorePlayerTeam.func_96667_a(var60, var46.name);
+					font.drawStringWithShadow(var53, var20, var47, 16777215);
+					
+					GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F); // TODO: might not need this.
+										
+					if (var42 != null) {
+						int var51 = var20 + font.getStringWidth(var53) + 5;
+						int var50 = var20 + var16 - 12 - 5;
+
+						if (var50 - var51 > 5) {
+							Score var56 = var42.getScoreboard().func_96529_a(var46.name, var42);
+							String var57 = EnumChatFormatting.YELLOW + "" + var56.func_96652_c();
+							font.drawStringWithShadow(var57, var50 - font.getStringWidth(var57), var47, 16777215);
+						}
+					}
+					
 					this.mc.renderEngine.bindTexture(this.mc.renderEngine.getTexture("/gui/icons.png"));
 					byte var50 = 0;
 					boolean var48 = false;
@@ -334,6 +411,49 @@ public class GuiIngame extends Gui {
 		GL11.glEnable(GL11.GL_ALPHA_TEST);
 	}
 
+	private void func_96136_a(ScoreObjective par1ScoreObjective, int par2, int par3, FontRenderer par4FontRenderer) {
+		Scoreboard var5 = par1ScoreObjective.getScoreboard();
+		Collection var6 = var5.func_96534_i(par1ScoreObjective);
+
+		if (var6.size() <= 15) {
+			int var7 = par4FontRenderer.getStringWidth(par1ScoreObjective.getDisplayName());
+			String var11;
+
+			for (Iterator var8 = var6.iterator(); var8.hasNext(); var7 = Math.max(var7, par4FontRenderer.getStringWidth(var11))) {
+				Score var9 = (Score)var8.next();
+				ScorePlayerTeam var10 = var5.getPlayersTeam(var9.func_96653_e());
+				var11 = ScorePlayerTeam.func_96667_a(var10, var9.func_96653_e()) + ": " + EnumChatFormatting.RED + var9.func_96652_c();
+			}
+
+			int var22 = var6.size() * par4FontRenderer.FONT_HEIGHT;
+			int var23 = par2 / 2 + var22 / 3;
+			byte var25 = 3;
+			int var24 = par3 - var7 - var25;
+			int var12 = 0;
+			Iterator var13 = var6.iterator();
+
+			while (var13.hasNext()) {
+				Score var14 = (Score)var13.next();
+				++var12;
+				ScorePlayerTeam var15 = var5.getPlayersTeam(var14.func_96653_e());
+				String var16 = ScorePlayerTeam.func_96667_a(var15, var14.func_96653_e());
+				String var17 = EnumChatFormatting.RED + "" + var14.func_96652_c();
+				int var19 = var23 - var12 * par4FontRenderer.FONT_HEIGHT;
+				int var20 = par3 - var25 + 2;
+				drawRect(var24 - 2, var19, var20, var19 + par4FontRenderer.FONT_HEIGHT, 1342177280);
+				par4FontRenderer.drawString(var16, var24, var19, 553648127);
+				par4FontRenderer.drawString(var17, var20 - par4FontRenderer.getStringWidth(var17), var19, 553648127);
+
+				if (var12 == var6.size()) {
+					String var21 = par1ScoreObjective.getDisplayName();
+					drawRect(var24 - 2, var19 - par4FontRenderer.FONT_HEIGHT - 1, var20, var19 - 1, 1610612736);
+					drawRect(var24 - 2, var19 - 1, var20, var19, 1342177280);
+					par4FontRenderer.drawString(var21, var24 + var7 / 2 - par4FontRenderer.getStringWidth(var21) / 2, var19 - par4FontRenderer.FONT_HEIGHT, 553648127);
+				}
+			}
+		}
+	}
+
 	/**
 	 * Renders dragon's (boss) health on the HUD
 	 */
@@ -357,7 +477,7 @@ public class GuiIngame extends Gui {
 			String var8 = BossStatus.bossName;
 			var1.drawStringWithShadow(var8, var3 / 2 - var1.getStringWidth(var8) / 2, var7 - 10, 16777215);
 			GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-			GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.mc.renderEngine.getTexture("/gui/icons.png"));
+			this.mc.renderEngine.bindTexture("/gui/icons.png");
 		}
 	}
 
@@ -367,7 +487,7 @@ public class GuiIngame extends Gui {
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 		GL11.glDisable(GL11.GL_ALPHA_TEST);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.mc.renderEngine.getTexture("%blur%/misc/pumpkinblur.png"));
+		this.mc.renderEngine.bindTexture("%blur%/misc/pumpkinblur.png");
 		Tessellator var3 = Tessellator.instance;
 		var3.startDrawingQuads();
 		var3.addVertexWithUV(0.0D, (double)par2, -90.0D, 0.0D, 1.0D);
@@ -400,7 +520,7 @@ public class GuiIngame extends Gui {
 		GL11.glDepthMask(false);
 		GL11.glBlendFunc(GL11.GL_ZERO, GL11.GL_ONE_MINUS_SRC_COLOR);
 		GL11.glColor4f(this.prevVignetteBrightness, this.prevVignetteBrightness, this.prevVignetteBrightness, 1.0F);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.mc.renderEngine.getTexture("%blur%/misc/vignette.png"));
+		this.mc.renderEngine.bindTexture("%blur%/misc/vignette.png");
 		Tessellator var4 = Tessellator.instance;
 		var4.startDrawingQuads();
 		var4.addVertexWithUV(0.0D, (double)par3, -90.0D, 0.0D, 1.0D);
@@ -429,18 +549,19 @@ public class GuiIngame extends Gui {
 		GL11.glDepthMask(false);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, par1);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.mc.renderEngine.getTexture("/terrain.png"));
-		float var4 = (float)(Block.portal.blockIndexInTexture % 16) / 16.0F;
-		float var5 = (float)(Block.portal.blockIndexInTexture / 16) / 16.0F;
-		float var6 = (float)(Block.portal.blockIndexInTexture % 16 + 1) / 16.0F;
-		float var7 = (float)(Block.portal.blockIndexInTexture / 16 + 1) / 16.0F;
-		Tessellator var8 = Tessellator.instance;
-		var8.startDrawingQuads();
-		var8.addVertexWithUV(0.0D, (double)par3, -90.0D, (double)var4, (double)var7);
-		var8.addVertexWithUV((double)par2, (double)par3, -90.0D, (double)var6, (double)var7);
-		var8.addVertexWithUV((double)par2, 0.0D, -90.0D, (double)var6, (double)var5);
-		var8.addVertexWithUV(0.0D, 0.0D, -90.0D, (double)var4, (double)var5);
-		var8.draw();
+		this.mc.renderEngine.bindTexture("/terrain.png");
+		Icon var4 = Block.portal.getBlockTextureFromSide(1);
+		float var5 = var4.getMinU();
+		float var6 = var4.getMinV();
+		float var7 = var4.getMaxU();
+		float var8 = var4.getMaxV();
+		Tessellator var9 = Tessellator.instance;
+		var9.startDrawingQuads();
+		var9.addVertexWithUV(0.0D, (double)par3, -90.0D, (double)var5, (double)var8);
+		var9.addVertexWithUV((double)par2, (double)par3, -90.0D, (double)var7, (double)var8);
+		var9.addVertexWithUV((double)par2, 0.0D, -90.0D, (double)var7, (double)var6);
+		var9.addVertexWithUV(0.0D, 0.0D, -90.0D, (double)var5, (double)var6);
+		var9.draw();
 		GL11.glDepthMask(true);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		GL11.glEnable(GL11.GL_ALPHA_TEST);
@@ -488,16 +609,16 @@ public class GuiIngame extends Gui {
 			ItemStack var1 = this.mc.thePlayer.inventory.getCurrentItem();
 
 			if (var1 == null) {
-				this.field_92017_k = 0;
-			} else if (this.field_92016_l != null && var1.itemID == this.field_92016_l.itemID && ItemStack.areItemStackTagsEqual(var1, this.field_92016_l) && (var1.isItemStackDamageable() || var1.getItemDamage() == this.field_92016_l.getItemDamage())) {
-				if (this.field_92017_k > 0) {
-					--this.field_92017_k;
+				this.remainingHighlightTicks = 0;
+			} else if (this.highlightingItemStack != null && var1.itemID == this.highlightingItemStack.itemID && ItemStack.areItemStackTagsEqual(var1, this.highlightingItemStack) && (var1.isItemStackDamageable() || var1.getItemDamage() == this.highlightingItemStack.getItemDamage())) {
+				if (this.remainingHighlightTicks > 0) {
+					--this.remainingHighlightTicks;
 				}
 			} else {
-				this.field_92017_k = 40;
+				this.remainingHighlightTicks = 40;
 			}
 
-			this.field_92016_l = var1;
+			this.highlightingItemStack = var1;
 		}
 	}
 

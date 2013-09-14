@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -21,13 +21,10 @@ package org.spoutcraft.client.gui;
 
 import net.minecraft.src.GuiScreen;
 
-import org.spoutcraft.api.Spoutcraft;
-import org.spoutcraft.api.addon.Addon;
 import org.spoutcraft.api.gui.Button;
 import org.spoutcraft.api.gui.GenericButton;
 import org.spoutcraft.api.gui.GenericLabel;
 import org.spoutcraft.api.gui.GenericTextField;
-import org.spoutcraft.client.gui.GuiTextDialog.DialogEventHandler;
 
 public class GuiTextDialog extends GuiSpoutScreen {
 	private String title, text;
@@ -53,8 +50,7 @@ public class GuiTextDialog extends GuiSpoutScreen {
 		buttonCancel = new GenericButton("Cancel");
 		buttonDone = new GenericButton("Done");
 
-		Addon spoutcraft = Spoutcraft.getAddonManager().getAddon("Spoutcraft");
-		getScreen().attachWidgets(spoutcraft, labelTitle, textText, buttonCancel, buttonDone);
+		getScreen().attachWidgets("Spoutcraft", labelTitle, textText, buttonCancel, buttonDone);
 	}
 
 	protected void layoutWidgets() {

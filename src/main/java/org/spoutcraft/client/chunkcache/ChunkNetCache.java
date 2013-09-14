@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -62,7 +62,6 @@ public class ChunkNetCache {
 	public static AtomicBoolean cacheInUse = new AtomicBoolean(false);
 
 	public static byte[] handle(byte[] chunkData, int decompressedSize, int compressedSize, int numChunks, int cx, int cz) throws IOException {
-
 		int d = totalData.addAndGet(compressedSize);
 		int c = chunks.addAndGet(numChunks);
 

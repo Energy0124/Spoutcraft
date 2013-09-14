@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -42,7 +42,6 @@ import net.minecraft.src.StringTranslate;
 import org.bukkit.ChatColor;
 
 import org.spoutcraft.api.Spoutcraft;
-import org.spoutcraft.api.addon.Addon;
 import org.spoutcraft.api.gui.Button;
 import org.spoutcraft.api.gui.Color;
 import org.spoutcraft.api.gui.GenericButton;
@@ -56,7 +55,6 @@ import org.spoutcraft.api.gui.WidgetAnchor;
 import org.spoutcraft.client.SpoutClient;
 import org.spoutcraft.client.config.Configuration;
 import org.spoutcraft.client.gui.MCRenderDelegate;
-import org.spoutcraft.client.gui.settings.GuiAdvancedOptions;
 import org.spoutcraft.client.gui.settings.GuiSimpleOptions;
 import org.spoutcraft.client.io.CustomTextureManager;
 import org.spoutcraft.client.io.FileUtil;
@@ -73,7 +71,7 @@ public class MainMenu extends GuiScreen {
 	static String timeOfDay = "";
 	final static List<String> backgrounds = new ArrayList<String>();
 	// Animate click delay
-	private static final int CLICK_DELAY = 7;
+	private static final int CLICK_DELAY = 50;
 	int clickDelay = 0;
 	// Debug
 	long lastTime = System.currentTimeMillis();
@@ -199,7 +197,6 @@ public class MainMenu extends GuiScreen {
 	}
 
 	public void initGui() {
-		Addon spoutcraft = Spoutcraft.getAddonManager().getAddon("Spoutcraft");
 		int textWidth;
 
 		StringTranslate translate = StringTranslate.getInstance();
@@ -210,7 +207,7 @@ public class MainMenu extends GuiScreen {
 		multiplayer = new GenericButton(translate.translateKey("menu.multiplayer"));
 		multiplayer.setGeometry(width - 110, height - 130, 100, 20);
 
-		textures = new GenericButton(translate.translateKey("menu.mods"));
+		textures = new GenericButton(translate.translateKey("options.texture.pack"));
 		textures.setGeometry(width - 110, height - 105, 100, 20);
 
 		buildNumber = new GenericLabel(SpoutClient.getClientVersion());
@@ -266,7 +263,7 @@ public class MainMenu extends GuiScreen {
 		debugText.setTextColor(new Color(0xFFE303));
 		debugText.setGeometry(1, 1, 12, 100);
 		debugText.setVisible(false);
-		this.getScreen().attachWidgets(spoutcraft, singleplayer, multiplayer, textures, buildNumber, background, splashText, about, options,  logo, quit, animate, debugText);
+		this.getScreen().attachWidgets("Spoutcraft", singleplayer, multiplayer, textures, buildNumber, background, splashText, about, options,  logo, quit, animate, debugText);
 	}
 
 	@Override

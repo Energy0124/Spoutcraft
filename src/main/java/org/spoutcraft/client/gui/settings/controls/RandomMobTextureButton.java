@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -21,10 +21,9 @@ package org.spoutcraft.client.gui.settings.controls;
 
 import net.minecraft.client.Minecraft;
 
-import org.spoutcraft.api.event.screen.ButtonClickEvent;
-import org.spoutcraft.api.gui.GenericCheckBox;
+import com.prupe.mcpatcher.TexturePackChangeHandler;
+
 import org.spoutcraft.client.config.Configuration;
-import com.pclewis.mcpatcher.TexturePackAPI;
 
 public class RandomMobTextureButton extends AutomatedCheckBox {
 	public RandomMobTextureButton() {
@@ -34,11 +33,11 @@ public class RandomMobTextureButton extends AutomatedCheckBox {
 	}
 
 	@Override
-	public void onButtonClick(ButtonClickEvent event) {
+	public void onButtonClick() {
 		Configuration.setRandomMobTextures(!Configuration.isRandomMobTextures());
 		Configuration.write();
 
-		TexturePackAPI.ChangeHandler.change();
+		TexturePackChangeHandler.scheduleTexturePackRefresh();
 		if (Minecraft.theMinecraft.theWorld != null) {
 			Minecraft.theMinecraft.renderGlobal.updateAllRenderers();
 		}

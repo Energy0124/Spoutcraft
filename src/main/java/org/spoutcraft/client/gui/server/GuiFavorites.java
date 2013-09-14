@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -21,34 +21,25 @@ package org.spoutcraft.client.gui.server;
 
 import net.minecraft.src.GuiScreen;
 
-import org.bukkit.ChatColor;
-
-import org.spoutcraft.api.addon.Addon;
 import org.spoutcraft.api.gui.Button;
 import org.spoutcraft.api.gui.Color;
 import org.spoutcraft.api.gui.GenericButton;
-import org.spoutcraft.api.gui.GenericComboBox;
 import org.spoutcraft.api.gui.GenericLabel;
 import org.spoutcraft.api.gui.GenericTextField;
 import org.spoutcraft.api.gui.Keyboard;
-import org.spoutcraft.api.gui.RenderPriority;
 import org.spoutcraft.api.gui.TextField;
 import org.spoutcraft.api.gui.GenericListView;
-import org.spoutcraft.api.gui.WidgetAnchor;
 import org.spoutcraft.client.SpoutClient;
-import org.spoutcraft.client.gui.LinkButton;
 
 public class GuiFavorites extends GuiScreen {
 	private GuiScreen parent;
 
 	// GUI stuff
-	private Button buttonJoin, buttonAdd, buttonDelete, buttonEdit, buttonMainMenu, buttonServerList, buttonQuickJoin, buttonMoveUp, buttonMoveDown, buttonRefresh, buttonGetISeeYou;
-	private GenericLabel labelDescriptionISeeYou, labelLookingForServers;
+	private Button buttonJoin, buttonAdd, buttonDelete, buttonEdit, buttonMainMenu, buttonServerList, buttonQuickJoin, buttonMoveUp, buttonMoveDown, buttonRefresh;
+	private GenericLabel labelTitle;
 	private TextField textQuickJoin;
 	private GenericListView view;
-	private GenericComboBox comboSource;
-	public ServerModel model = SpoutClient.getInstance().getServerManager()
-			.getFavorites();
+	public ServerModel model = SpoutClient.getInstance().getServerManager().getFavorites();
 	private long pollTime = 0L;
 
 	public GuiFavorites(GuiScreen parent) {
@@ -58,71 +49,31 @@ public class GuiFavorites extends GuiScreen {
 
 	@Override
 	public void initGui() {
-		Addon spoutcraft = SpoutClient.getInstance().getAddonManager().getAddon("spoutcraft");
-
-		int selection = 0;
-		if (comboSource != null) {
-			selection = comboSource.getSelectedRow();
-		}
-
-		comboSource = new SwitchViewSourceCombo(this);
-		getScreen().attachWidget(spoutcraft, comboSource);
-		comboSource.setGeometry(width / 2 - 75, 5, 150, 20);
-		comboSource.setSelection(selection);
+		labelTitle = new GenericLabel("Favorite Servers");
+		labelTitle.setY(12).setX(width / 2 - mc.fontRenderer.getStringWidth(labelTitle.getText()) / 2);
+		labelTitle.setHeight(15).setWidth(mc.fontRenderer.getStringWidth(labelTitle.getText()) / 2);
+		getScreen().attachWidget("Spoutcraft", labelTitle);
 
 		buttonMoveUp = new GenericButton("/\\");
 		buttonMoveUp.setTooltip("Move Item Up");
 		buttonMoveUp.setX(5).setY(5);
 		buttonMoveUp.setHeight(20).setWidth(20);
-		getScreen().attachWidget(spoutcraft, buttonMoveUp);
+		getScreen().attachWidget("Spoutcraft", buttonMoveUp);
 
 		buttonMoveDown = new GenericButton("\\/");
 		buttonMoveDown.setTooltip("Move Item Down");
 		buttonMoveDown.setX(25).setY(5);
 		buttonMoveDown.setHeight(20).setWidth(20);
-		getScreen().attachWidget(spoutcraft, buttonMoveDown);
+		getScreen().attachWidget("Spoutcraft", buttonMoveDown);
 
 		buttonRefresh = new GenericButton("Refresh");
 		buttonRefresh.setHeight(20).setWidth(100).setX(width - 105).setY(5);
-		getScreen().attachWidget(spoutcraft, buttonRefresh);
-
-		boolean helpVisible = (buttonGetISeeYou != null) ? buttonGetISeeYou.isVisible() : false;
+		getScreen().attachWidget("Spoutcraft", buttonRefresh);
 
 		int viewheight = height - 110;
 		view = new GenericListView(model);
 		view.setX(5).setY(30).setWidth(width - 10).setHeight(viewheight);
-		getScreen().attachWidget(spoutcraft, view);
-
-		buttonGetISeeYou = new LinkButton("Get " + ChatColor.BOLD + "I See You" + ChatColor.RESET + " now", "http://spout.in/iseeyou");
-		labelLookingForServers = new GenericLabel("Looking for servers in your local network ...");
-		labelLookingForServers.setX(15).setVisible(helpVisible);
-		labelLookingForServers.setPriority(RenderPriority.Low);
-		getScreen().attachWidget(spoutcraft, labelLookingForServers);
-
-		labelDescriptionISeeYou = new GenericLabel(
-						"If your server should be displayed here, "
-						+ "assure that it is turned on, the network address is "
-						+ "available from your computer, and that you have the "
-						+ "I See You plugin installed on your Bukkit server.\n"
-						+ "The new Spout Server will support this feature soon.");
-		labelDescriptionISeeYou.setWidth(width - 30).setPriority(RenderPriority.Low);;
-		labelDescriptionISeeYou.setWrapLines(true);
-		// labelDescriptionISeeYou.setAlign(WidgetAnchor.TOP_CENTER); // This align code sucks
-		labelDescriptionISeeYou.recalculateLines();
-
-		int lh = (int) labelDescriptionISeeYou.getHeight();
-		labelDescriptionISeeYou.setY((int) (30 + 16 + (viewheight / 2 - (lh + 25 + 16) / 2)));
-		labelDescriptionISeeYou.setX(15);
-		labelDescriptionISeeYou.setVisible(helpVisible);
-		getScreen().attachWidget(spoutcraft, labelDescriptionISeeYou);
-
-		labelLookingForServers.setY(labelDescriptionISeeYou.getY() - 16);
-
-		buttonGetISeeYou.setX(width / 2 - 150 / 2).setPriority(RenderPriority.Low);
-		buttonGetISeeYou.setY(labelDescriptionISeeYou.getY() + lh + 5);
-		buttonGetISeeYou.setHeight(20).setWidth(150);
-		buttonGetISeeYou.setVisible(helpVisible);
-		getScreen().attachWidget(spoutcraft, buttonGetISeeYou);
+		getScreen().attachWidget("Spoutcraft", view);
 
 		int top = (int) (view.getY() + view.getHeight() + 5);
 
@@ -140,41 +91,41 @@ public class GuiFavorites extends GuiScreen {
 		textQuickJoin.setX(left + 2).setY(top + 2).setHeight(16).setWidth(cellWidth * 2 + 5 - 4);
 		textQuickJoin.setMaximumCharacters(0);
 		textQuickJoin.setText(text);
-		getScreen().attachWidget(spoutcraft, textQuickJoin);
+		getScreen().attachWidget("Spoutcraft", textQuickJoin);
 
 		buttonQuickJoin = new GenericButton("Quick Join");
 		buttonQuickJoin.setX(right).setY(top).setWidth(cellWidth).setHeight(20);
-		getScreen().attachWidget(spoutcraft, buttonQuickJoin);
+		getScreen().attachWidget("Spoutcraft", buttonQuickJoin);
 
 		top += 25;
 
 		buttonJoin = new GenericButton("Join Server");
 		buttonJoin.setX(right).setY(top).setWidth(cellWidth).setHeight(20);
-		getScreen().attachWidget(spoutcraft, buttonJoin);
+		getScreen().attachWidget("Spoutcraft", buttonJoin);
 
 		buttonAdd = new GenericButton("Add Favorite");
 		buttonAdd.setX(center).setY(top).setWidth(cellWidth).setHeight(20);
-		getScreen().attachWidget(spoutcraft, buttonAdd);
+		getScreen().attachWidget("Spoutcraft", buttonAdd);
 
 		buttonEdit = new GenericButton("Edit");
 		buttonEdit.setX(left).setY(top).setWidth(cellWidth).setHeight(20);
-		getScreen().attachWidget(spoutcraft, buttonEdit);
+		getScreen().attachWidget("Spoutcraft", buttonEdit);
 
 		top += 25;
 
 		buttonDelete = new DeleteFavoriteButton(this);
 		buttonDelete.setX(left).setY(top).setWidth(cellWidth).setHeight(20);
-		getScreen().attachWidget(spoutcraft, buttonDelete);
+		getScreen().attachWidget("Spoutcraft", buttonDelete);
 
 		buttonServerList = new GenericButton("Server List");
 		buttonServerList.setX(center).setY(top).setWidth(cellWidth)
 				.setHeight(20);
-		getScreen().attachWidget(spoutcraft, buttonServerList);
+		getScreen().attachWidget("Spoutcraft", buttonServerList);
 
 		buttonMainMenu = new GenericButton("Main Menu");
 		buttonMainMenu.setX(right).setY(top).setWidth(cellWidth).setHeight(20);
-		getScreen().attachWidget(spoutcraft, buttonMainMenu);
-
+		getScreen().attachWidget("Spoutcraft", buttonMainMenu);
+		refresh();
 		updateButtons();
 	}
 
@@ -294,9 +245,11 @@ public class GuiFavorites extends GuiScreen {
 
 	public void updateButtons() {
 		boolean enable = true;
+
 		if (view != null && view.getSelectedRow() == -1) {
 			enable = false;
 		}
+
 		// GUI has not been initialized
 		if (buttonEdit == null) {
 			return;
@@ -308,20 +261,7 @@ public class GuiFavorites extends GuiScreen {
 		buttonMoveDown.setEnabled(enable);
 		buttonMoveUp.setEnabled(enable);
 		buttonAdd.setEnabled(true);
-		if (model instanceof LANModel) {
-			buttonEdit.setEnabled(false);
-			buttonDelete.setEnabled(false);
-			buttonMoveDown.setEnabled(false);
-			buttonMoveUp.setEnabled(false);
-			if (view.getSelectedItem() == null) {
-				buttonAdd.setEnabled(false);
-			} else {
-				ServerItem item = (ServerItem) view.getSelectedItem();
-				if (SpoutClient.getInstance().getServerManager().getFavorites().containsSever(item)) {
-					buttonAdd.setEnabled(false);
-				}
-			}
-		}
+
 		if (model.isPolling()) {
 			buttonRefresh.setEnabled(false);
 			buttonRefresh.setText("Polling...");
@@ -330,11 +270,16 @@ public class GuiFavorites extends GuiScreen {
 			buttonRefresh.setEnabled(true);
 			buttonRefresh.setText("Refresh");
 		}
+		
+		if (view.getSelectedItem() instanceof ServerItem) {
+			ServerItem item = (ServerItem) view.getSelectedItem();
+			buttonJoin.setEnabled(item.isCompatible(SpoutClient.spoutcraftVersion));
+		}
 	}
 
 	@Override
 	public void updateScreen() {
-		if (model.isPolling() || buttonGetISeeYou.isVisible()) {
+		if (model.isPolling()) {
 			Color color = new Color(0, 0f, 0);
 			double darkness = 0;
 			long t = System.currentTimeMillis() % 1000;
@@ -342,9 +287,6 @@ public class GuiFavorites extends GuiScreen {
 			color.setBlue(1f - (float) darkness);
 			if (model.isPolling()) {
 				buttonRefresh.setDisabledColor(color);
-			}
-			if (buttonGetISeeYou.isVisible()) {
-				labelLookingForServers.setTextColor(color);
 			}
 
 			// If polling locks up and takes > 15s, unlock the button
@@ -358,36 +300,7 @@ public class GuiFavorites extends GuiScreen {
 				model.setPolling(false);
 			}
 		}
-
 		buttonQuickJoin.setEnabled(textQuickJoin.getText().length() > 0);
-
-		if (buttonGetISeeYou.isVisible()) {
-			LANModel lan = (LANModel) model;
-			if (lan.getSize() > 0) {
-				setISeeYouHelpVisible(false);
-			}
-		}
 		super.updateScreen();
-	}
-
-	public void setModel(ServerModel model) {
-		this.model = model;
-		view.setSelection(-1);
-		view.setModel(model);
-		model.setCurrentGUI(this);
-
-		if (model instanceof LANModel) {
-			LANModel lan = (LANModel) model;
-			setISeeYouHelpVisible(lan.getSize() == 0);
-		} else {
-			setISeeYouHelpVisible(false);
-		}
-	}
-
-	public void setISeeYouHelpVisible(boolean visible) {
-		//view.setVisible(!visible);
-		buttonGetISeeYou.setVisible(visible);
-		labelDescriptionISeeYou.setVisible(visible);
-		labelLookingForServers.setVisible(visible);
 	}
 }

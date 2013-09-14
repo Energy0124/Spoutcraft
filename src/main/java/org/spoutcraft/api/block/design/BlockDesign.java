@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -22,8 +22,6 @@ package org.spoutcraft.api.block.design;
 import java.io.IOException;
 import java.util.Random;
 
-import org.spoutcraft.api.addon.Addon;
-import org.spoutcraft.api.entity.Item;
 import org.spoutcraft.api.io.SpoutInputStream;
 import org.spoutcraft.api.material.Block;
 import org.spoutcraft.api.util.Vector;
@@ -89,7 +87,7 @@ public interface BlockDesign {
 	 * @param texture to set
 	 * @return this
 	 */
-	public BlockDesign setTexture(Addon addon, Texture texture);
+	public BlockDesign setTexture(String addon, Texture texture);
 
 	/**
 	 * Sets the bounding box for this block
@@ -235,7 +233,7 @@ public interface BlockDesign {
 	 * Renders this design as an item in the world
 	 * @param block material being rendered
 	 */
-	public boolean renderItemstack(Item item, float x, float y, float depth, float rotation, float scale, Random rand);
+	public boolean renderItemstack(net.minecraft.src.ItemStack item, float x, float y, float depth, float rotation, float scale, Random rand);
 
 	public boolean renderItemOnHUD(float x, float y, float depth);
 }

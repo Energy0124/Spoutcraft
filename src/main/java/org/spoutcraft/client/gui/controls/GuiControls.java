@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -23,7 +23,6 @@ import net.minecraft.src.GuiScreen;
 
 import org.spoutcraft.api.ChatColor;
 import org.spoutcraft.api.Spoutcraft;
-import org.spoutcraft.api.addon.Addon;
 import org.spoutcraft.api.gui.Button;
 import org.spoutcraft.api.gui.CheckBox;
 import org.spoutcraft.api.gui.GenericButton;
@@ -46,7 +45,7 @@ import org.spoutcraft.client.gui.controls.ShortcutBindingItem;
 public class GuiControls extends GuiSpoutScreen implements ButtonUpdater {
 	private GenericLabel labelTitle, labelDescription;
 	private Button buttonDone, buttonAdd, buttonEdit, buttonRemove;
-	public CheckBox checkVanilla, checkShortcuts, checkBindings, checkSpoutcraft;
+	public CheckBox checkVanilla, checkSpoutcraft, checkCustom, checkShortcuts;
 	public ControlsSearch search;
 	private ScrollArea filter;
 	private GenericListView view;
@@ -55,8 +54,8 @@ public class GuiControls extends GuiSpoutScreen implements ButtonUpdater {
 
 	public static final ChatColor VANILLA_COLOR = ChatColor.YELLOW;
 	public static final ChatColor SPOUTCRAFT_COLOR = ChatColor.RED;
+	public static final ChatColor CUSTOM_COLOR = ChatColor.BLUE;
 	public static final ChatColor SHORTCUTS_COLOR = ChatColor.GREEN;
-	public static final ChatColor BINDINGS_COLOR = ChatColor.BLUE;
 
 	public GuiControls(GuiScreen parent) {
 		if (model == null) {
@@ -66,7 +65,6 @@ public class GuiControls extends GuiSpoutScreen implements ButtonUpdater {
 	}
 
 	protected void createInstances() {
-		Addon spoutcraft = Spoutcraft.getAddonManager().getAddon("Spoutcraft");
 		labelTitle = new GenericLabel("Controls");
 		buttonDone = new GenericButton("Done");
 		buttonAdd = new GenericButton("Add Shortcut");
@@ -83,24 +81,24 @@ public class GuiControls extends GuiSpoutScreen implements ButtonUpdater {
 
 		checkVanilla = new ControlsCheckBox(this, VANILLA_COLOR + "Minecraft Bindings");
 		checkSpoutcraft = new ControlsCheckBox(this, SPOUTCRAFT_COLOR + "Spoutcraft Bindings");
+		checkCustom = new ControlsCheckBox(this, CUSTOM_COLOR + "Custom Bindings");
 		checkShortcuts = new ControlsCheckBox(this, SHORTCUTS_COLOR + "Shortcuts");
-		checkBindings = new ControlsCheckBox(this, BINDINGS_COLOR + "Bindings");
 		search = new ControlsSearch(this);
 
-		filter.attachWidget(spoutcraft, checkVanilla);
-		filter.attachWidget(spoutcraft, checkSpoutcraft);
-		filter.attachWidget(spoutcraft, checkShortcuts);
-		filter.attachWidget(spoutcraft, checkBindings);
+		filter.attachWidget("Spoutcraft", checkVanilla);
+		filter.attachWidget("Spoutcraft", checkSpoutcraft);
+		filter.attachWidget("Spoutcraft", checkCustom);
+		filter.attachWidget("Spoutcraft", checkShortcuts);
 
-		getScreen().attachWidget(spoutcraft, search);
-		getScreen().attachWidget(spoutcraft, labelTitle);
-		getScreen().attachWidget(spoutcraft, filter);
-		getScreen().attachWidget(spoutcraft, view);
-		getScreen().attachWidget(spoutcraft, buttonAdd);
-		getScreen().attachWidget(spoutcraft, buttonEdit);
-		getScreen().attachWidget(spoutcraft, buttonRemove);
-		getScreen().attachWidget(spoutcraft, buttonDone);
-		getScreen().attachWidget(spoutcraft, labelDescription);
+		getScreen().attachWidget("Spoutcraft", search);
+		getScreen().attachWidget("Spoutcraft", labelTitle);
+		getScreen().attachWidget("Spoutcraft", filter);
+		getScreen().attachWidget("Spoutcraft", view);
+		getScreen().attachWidget("Spoutcraft", buttonAdd);
+		getScreen().attachWidget("Spoutcraft", buttonEdit);
+		getScreen().attachWidget("Spoutcraft", buttonRemove);
+		getScreen().attachWidget("Spoutcraft", buttonDone);
+		getScreen().attachWidget("Spoutcraft", labelDescription);
 		updateButtons();
 		model.refresh();
 	}
@@ -126,9 +124,9 @@ public class GuiControls extends GuiSpoutScreen implements ButtonUpdater {
 		ftop += 25;
 		checkSpoutcraft.setX(5).setY(ftop).setWidth(100).setHeight(20);
 		ftop += 25;
-		checkShortcuts.setX(5).setY(ftop).setWidth(100).setHeight(20);
+		checkCustom.setX(5).setY(ftop).setWidth(100).setHeight(20);
 		ftop += 25;
-		checkBindings.setX(5).setY(ftop).setWidth(100).setHeight(20);
+		checkShortcuts.setX(5).setY(ftop).setWidth(100).setHeight(20);
 
 		for (Widget w:filter.getAttachedWidgets()) {
 			w.setWidth(filter.getViewportSize(Orientation.HORIZONTAL) - 10);

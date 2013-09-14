@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -30,7 +30,6 @@ import net.minecraft.src.Item;
 
 import org.spoutcraft.api.util.map.TIntPairFloatHashMap;
 import org.spoutcraft.api.util.map.TIntPairObjectHashMap;
-import org.spoutcraft.api.addon.Addon;
 import org.spoutcraft.api.inventory.ItemStack;
 import org.spoutcraft.api.inventory.MaterialManager;
 import org.spoutcraft.api.inventory.Recipe;
@@ -183,15 +182,10 @@ public class SimpleMaterialManager implements MaterialManager {
 		}
 	}
 
-	public void setItemTexture(Material item, Addon addon, String texture) {
+	public void setItemTexture(Material item, String addon, String texture) {
 		int id = item.getRawId();
 		int data = item.getRawData();
-		String addonName;
-		if (addon == null) {
-			addonName = null;
-		} else {
-			addonName = addon.getDescription().getName();
-		}
+		String addonName = addon;
 		customTextures.put(id, data, texture);
 		if (addonName == null) {
 			customTexturesPlugin.remove(id, data);
@@ -273,13 +267,16 @@ public class SimpleMaterialManager implements MaterialManager {
 		} else {
 			list = new ArrayList<String>();
 		}
-		Material item = MaterialData.getMaterial(is.getTypeId(), is.getDurability());
-		String custom = item != null ? String.format(item.getName(), String.valueOf(is.getDurability())) : null;
-		if (custom != null && is.getTypeId() != Item.potion.itemID) {
-			if (list.size() > 0) {
-				list.set(0, custom);
-			} else {
-				list.add(custom);
+
+		if (itemstack.itemID == MaterialData.flint.getRawId()) {
+			Material item = MaterialData.getMaterial(is.getTypeId(), is.getDurability());
+			String custom = item != null ? String.format(item.getName(), String.valueOf(is.getDurability())) : null;
+			if (custom != null && is.getTypeId() != Item.potion.itemID) {
+				if (list.size() > 0) {
+					list.set(0, custom);
+				} else {
+					list.add(custom);
+				}
 			}
 		}
 		if (list.size() > 0) {

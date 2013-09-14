@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -70,6 +70,6 @@ public class SimpleShapedRecipe extends ShapedRecipe implements SpoutcraftRecipe
 		int id = this.getResult().getTypeId();
 		int amount = this.getResult().getAmount();
 		short durability = this.getResult().getDurability();
-		CraftingManager.getInstance().func_92103_a(new net.minecraft.src.ItemStack(id, amount, durability), data);
+		CraftingManager.getInstance().addRecipe(new net.minecraft.src.ItemStack(id, amount, durability), data);
 	}
 }

@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -32,10 +32,10 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import net.minecraft.client.Minecraft;
 import net.minecraft.src.WorldClient;
 
-import org.spoutcraft.api.entity.Entity;
 import org.spoutcraft.api.io.SpoutInputStream;
 import org.spoutcraft.api.io.SpoutOutputStream;
 import org.spoutcraft.client.SpoutClient;
+import org.spoutcraft.client.entity.CraftEntity;
 
 public class PacketEntityInformation implements CompressablePacket {
 	private boolean compressed = false;
@@ -44,9 +44,9 @@ public class PacketEntityInformation implements CompressablePacket {
 	public PacketEntityInformation() {
 	}
 
-	public PacketEntityInformation(List<Entity> entities) {
+	public PacketEntityInformation(List<CraftEntity> entities) {
 		ByteBuffer tempbuffer = ByteBuffer.allocate(entities.size() * 4);
-		for (Entity e : entities) {
+		for (CraftEntity e : entities) {
 			tempbuffer.putInt(e.getEntityId());
 		}
 		data = tempbuffer.array();

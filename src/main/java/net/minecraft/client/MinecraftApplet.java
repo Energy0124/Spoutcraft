@@ -24,26 +24,12 @@ public class MinecraftApplet extends Applet {
 	private Thread mcThread = null;
 
 	public void init() {
-		this.mcCanvas = new CanvasMinecraftApplet(this);
-		boolean var1 = "true".equalsIgnoreCase(this.getParameter("fullscreen"));
-		this.mc = new MinecraftAppletImpl(this, this.mcCanvas, this, this.getWidth(), this.getHeight(), var1);
-		this.mc.minecraftUri = this.getDocumentBase().getHost();
-
-		if (this.getDocumentBase().getPort() > 0) {
-			this.mc.minecraftUri = this.mc.minecraftUri + ":" + this.getDocumentBase().getPort();
-		}
-
-		if (this.getParameter("username") != null && this.getParameter("sessionid") != null) {
-			this.mc.session = new Session(this.getParameter("username"), this.getParameter("sessionid"));
-			System.out.println("Setting user: " + this.mc.session.username + ", " + this.mc.session.sessionId);
-		} else {
-			this.mc.session = new Session("Player", "");
-		}
 		// Spout Start
-		if(this.getParameter("spoutcraftlauncher") != null) {
+		// Note to maintainers, this code must be before MinecraftAppletImpl is created
+		if (this.getParameter("spoutcraftlauncher") != null) {
 			Minecraft.spoutcraftLauncher = this.getParameter("spoutcraftlauncher").equalsIgnoreCase("true");
 		}
-		if(this.getParameter("portable") != null) {
+		if (this.getParameter("portable") != null) {
 			Minecraft.portable = this.getParameter("portable").equalsIgnoreCase("true");
 		}
 		if (this.getParameter("proxy_host") != null) {
@@ -58,6 +44,23 @@ public class MinecraftApplet extends Applet {
 			}
 		}
 		// Spout End
+		this.mcCanvas = new CanvasMinecraftApplet(this);
+		boolean var1 = "true".equalsIgnoreCase(this.getParameter("fullscreen"));
+		this.mc = new MinecraftAppletImpl(this, this.mcCanvas, this, this.getWidth(), this.getHeight(), var1);
+		this.mc.minecraftUri = this.getDocumentBase().getHost();
+
+		if (this.getDocumentBase().getPort() > 0) {
+			this.mc.minecraftUri = this.mc.minecraftUri + ":" + this.getDocumentBase().getPort();
+		}
+
+		if (this.getParameter("username") != null && this.getParameter("sessionid") != null) {
+			this.mc.session = new Session(this.getParameter("username"), this.getParameter("sessionid"));
+			// Spout Start
+			System.out.println("Setting user: " + this.mc.session.username);
+			// Spout End
+		} else {
+			this.mc.session = new Session("Player", "");
+		}
 
 		this.mc.setDemo("true".equals(this.getParameter("demo")));
 

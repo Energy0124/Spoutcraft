@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -70,7 +70,7 @@ public class ServerManager {
 	public void join(String ip, int port, GuiScreen from, String name) {
 		this.joinedFrom = from;
 		this.screenName = name;
-		SpoutClient.getHandle().displayGuiScreen(new GuiConnecting(SpoutClient.getHandle(), new ServerData(name, ip+":"+port)));
+		SpoutClient.getHandle().displayGuiScreen(new GuiConnecting(SpoutClient.getHandle(), new ServerData(name, ip + ":" + port)));
 	}
 
 	public void join(SpoutServerData serverData, GuiScreen from, String name) {

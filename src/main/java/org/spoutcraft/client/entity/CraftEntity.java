@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -26,12 +26,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import org.spoutcraft.api.World;
-import org.spoutcraft.api.entity.Arrow;
-import org.spoutcraft.api.entity.Entity;
 import org.spoutcraft.api.entity.EntitySkinType;
-import org.spoutcraft.api.entity.Player;
-import org.spoutcraft.api.entity.TextEntity;
 import org.spoutcraft.api.property.PropertyObject;
 import org.spoutcraft.api.property.Property;
 import org.spoutcraft.api.util.FixedLocation;
@@ -39,11 +34,11 @@ import org.spoutcraft.api.util.Location;
 import org.spoutcraft.api.util.MutableLocation;
 import org.spoutcraft.api.util.MutableVector;
 import org.spoutcraft.api.util.Vector;
+import org.spoutcraft.client.SpoutcraftWorld;
 import org.spoutcraft.client.player.SpoutPlayer;
 
-public class CraftEntity extends PropertyObject implements Entity {
+public class CraftEntity extends PropertyObject{
 	protected net.minecraft.src.Entity handle = null;
-	protected static HashMap<Class<? extends Entity>, Class<? extends CraftEntity>> interfacedClasses = new HashMap<Class<? extends Entity>, Class<? extends CraftEntity>>();
 
 	public CraftEntity() {
 	}
@@ -72,7 +67,7 @@ public class CraftEntity extends PropertyObject implements Entity {
 	}
 
 	public Location getLocation() {
-		return new MutableLocation(getWorld(),handle.posX,handle.posY,handle.posZ,handle.rotationYaw,handle.rotationPitch);
+		return new MutableLocation(handle.posX,handle.posY,handle.posZ,handle.rotationYaw,handle.rotationPitch);
 	}
 
 	public void setVelocity(Vector velocity) {
@@ -85,7 +80,7 @@ public class CraftEntity extends PropertyObject implements Entity {
 		return new MutableVector(handle.motionX, handle.motionY, handle.motionZ);
 	}
 
-	public World getWorld() {
+	public SpoutcraftWorld getWorld() {
 		return handle.worldObj.world;
 	}
 
@@ -95,13 +90,13 @@ public class CraftEntity extends PropertyObject implements Entity {
 		return true;
 	}
 
-	public boolean teleport(Entity destination) {
+	public boolean teleport(CraftEntity destination) {
 		return teleport(destination.getLocation());
 	}
 
-	public Set<Entity> getNearbyEntities(double x, double y, double z) {
+	public Set<CraftEntity> getNearbyEntities(double x, double y, double z) {
 		List<net.minecraft.src.Entity> notchEntityList = handle.worldObj.getEntitiesWithinAABBExcludingEntity(handle, handle.boundingBox.expand(x, y, z));
-		Set<Entity> entities = new HashSet<Entity>(notchEntityList.size());
+		Set<CraftEntity> entities = new HashSet<CraftEntity>(notchEntityList.size());
 
 		for (net.minecraft.src.Entity e: notchEntityList) {
 			entities.add(e.spoutEnty);
@@ -133,11 +128,11 @@ public class CraftEntity extends PropertyObject implements Entity {
 		return handle.isDead;
 	}
 
-	public Entity getPassenger() {
+	public CraftEntity getPassenger() {
 		return handle.riddenByEntity.spoutEnty;
 	}
 
-	public boolean setPassenger(Entity passenger) {
+	public boolean setPassenger(CraftEntity passenger) {
 		handle.riddenByEntity = ((CraftEntity)passenger).handle;
 		((CraftEntity)passenger).handle.ridingEntity = handle;
 		return true;
@@ -166,39 +161,6 @@ public class CraftEntity extends PropertyObject implements Entity {
 
 	public UUID getUniqueId() {
 		return handle.uniqueId;
-	}
-
-	@SuppressWarnings("unchecked")
-	public static Entity spawn(FixedLocation loc, Class<Entity> clazz) {
-		Class<CraftEntity> craftClass = (Class<CraftEntity>) interfacedClasses.get(clazz);
-		CraftEntity ret = null;
-		try {
-			ret = craftClass.getConstructor(FixedLocation.class).newInstance(loc);
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-			return null;
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-			return null;
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-			return null;
-		} catch (SecurityException e) {
-			e.printStackTrace();
-			return null;
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-			return null;
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-			return null;
-		}
-		return ret;
-	}
-
-	public static void registerTypes() {
-		interfacedClasses.put(TextEntity.class, CraftTextEntity.class);
-		interfacedClasses.put(Player.class, SpoutPlayer.class);
 	}
 
 	public int getTicksLived() {

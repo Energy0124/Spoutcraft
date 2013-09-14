@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -24,7 +24,6 @@ import java.util.Random;
 import net.minecraft.client.Minecraft;
 import net.minecraft.src.AxisAlignedBB;
 import net.minecraft.src.Chunk;
-import net.minecraft.src.Entity;
 import net.minecraft.src.EntityLiving;
 import net.minecraft.src.Material;
 import net.minecraft.src.World;
@@ -114,13 +113,13 @@ public class MapCalculator implements Runnable {
 
 		// return world.b(x, z).b(x & 0xf, z & 0xf);
 		/*
-		 * li chunk = world.b(x, z); int y = (int)(game.h.aM); //starty; x &=
+		 * li chunk = world.b(x, z); int y = (int)(game.h.aM); // starty; x &=
 		 * 0xf; z &= 0xf;
 		 * 
 		 * //while (y > 0) // {
 		 * 
 		 * 
-		 * if (getBlockColor(id, meta).alpha == 0) return -1;//y--; else return
+		 * if (getBlockColor(id, meta).alpha == 0) return -1; // y--; else return
 		 * y + 1; // what //}
 		 */
 		// return -1;
@@ -364,7 +363,7 @@ public class MapCalculator implements Runnable {
 				}
 				//long dur = System.currentTimeMillis() - start;
 				//int chunks = (int) Math.pow(MinimapConfig.getInstance().getScanRadius() * 2, 2);
-				//System.out.println("Took " + dur + "ms to scan "+chunks+" chunks.\nThat is " + (float) (dur/(float)chunks) + " per chunk!");
+				//System.out.println("Took " + dur + "ms to scan " + chunks + " chunks.\nThat is " + (float) (dur/(float)chunks) + " per chunk!");
 				mapCalc();
 
 				entityCalc();
@@ -380,7 +379,7 @@ public class MapCalculator implements Runnable {
 	private void entityCalc() {
 		synchronized(map.watchedEntities) {
 			map.watchedEntities.clear();
-			if (!Spoutcraft.hasPermission("spout.client.minimap.showentities")) {
+			if (!Spoutcraft.hasPermission("spout.plugin.minimap.showentities")) {
 				return;
 			}
 			if (!MinimapConfig.getInstance().isShowingEntities()) {

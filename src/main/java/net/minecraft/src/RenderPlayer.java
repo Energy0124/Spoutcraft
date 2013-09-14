@@ -1,23 +1,19 @@
 package net.minecraft.src;
 
-import net.minecraft.client.Minecraft;
 import org.lwjgl.opengl.GL11;
+
 // Spout Start
+import net.minecraft.client.Minecraft;
 import org.spoutcraft.api.material.MaterialData;
 import org.spoutcraft.client.HDImageBufferDownload;
 import org.spoutcraft.client.player.accessories.AccessoryHandler;
 import org.spoutcraft.client.player.accessories.AccessoryType;
-import org.spoutcraft.client.special.ModelNarrowtux;
 import org.spoutcraft.client.special.VIP;
 // Spout End
 
 public class RenderPlayer extends RenderLiving {
 	// Spout Start - private to public
 	public ModelBiped modelBipedMain;
-	// Spout End
-	// Spout Start - narrowtux model
-	private ModelNarrowtux modelNarrowtux;
-	private float lastScale = 1f;
 	// Spout End
 	private ModelBiped modelArmorChestplate;
 	private ModelBiped modelArmor;
@@ -28,6 +24,10 @@ public class RenderPlayer extends RenderLiving {
 		this.modelBipedMain = (ModelBiped)this.mainModel;
 		this.modelArmorChestplate = new ModelBiped(1.0F);
 		this.modelArmor = new ModelBiped(0.5F);
+	}
+
+	protected void func_98191_a(EntityPlayer par1EntityPlayer) {
+		this.loadDownloadableImageTexture(par1EntityPlayer.skinUrl, par1EntityPlayer.getTexture());
 	}
 
 	/**
@@ -141,111 +141,15 @@ public class RenderPlayer extends RenderLiving {
 			var14 -= 0.125D;
 		}
 		// Spout Start - VIP
-		if(!AccessoryHandler.isHandled(par1EntityPlayer.username)) {
-			 AccessoryHandler.addVIPAccessoriesFor(par1EntityPlayer);
+		if (!AccessoryHandler.isHandled(par1EntityPlayer.username)) {
+			AccessoryHandler.addVIPAccessoriesFor(par1EntityPlayer);
 		}
-
-		VIP vip = par1EntityPlayer.vip;
-		if (vip != null) {
-			float s = vip.getScale();
-			GL11.glPushMatrix();
-			GL11.glTranslated(0, (s - 1) * 1.6, 0);
-			GL11.glScalef(s, s, s);
-			super.doRenderLiving(par1EntityPlayer, par2, var14, par6, par8, par9);
-			GL11.glPopMatrix();
-		} else {
-			super.doRenderLiving(par1EntityPlayer, par2, var14, par6, par8, par9);
-		}
+		
+		super.doRenderLiving(par1EntityPlayer, par2, var14, par6, par8, par9);
 		// Spout End
 		this.modelArmorChestplate.aimedBow = this.modelArmor.aimedBow = this.modelBipedMain.aimedBow = false;
 		this.modelArmorChestplate.isSneak = this.modelArmor.isSneak = this.modelBipedMain.isSneak = false;
 		this.modelArmorChestplate.heldItemRight = this.modelArmor.heldItemRight = this.modelBipedMain.heldItemRight = 0;
-	}
-
-	/**
-	 * Used to render a player's name above their head
-	 */
-	protected void renderName(EntityPlayer par1EntityPlayer, double par2, double par4, double par6) {
-		if(Minecraft.isGuiEnabled() && (par1EntityPlayer != this.renderManager.livingPlayer || (Minecraft.theMinecraft.gameSettings.thirdPersonView != 0 && Minecraft.theMinecraft.currentScreen == null && !par1EntityPlayer.getHasActivePotion()))) {	
-			float var8 = 1.6F;
-			float var9 = 0.016666668F * var8;
-			double var10 = par1EntityPlayer.getDistanceSqToEntity(this.renderManager.livingPlayer);
-			float var12 = par1EntityPlayer.isSneaking() ? 32.0F : 64.0F;
-
-			if (var10 < (double)(var12 * var12)) {
-				// Spout Start
-				String title = par1EntityPlayer.displayName;
-				//int color = EasterEggs.getEasterEggTitleColor();
-				float alpha = 0.25F;
-				// If a plugin hasn't set a title, use the easter egg title (if one exists)
-				/*if (EasterEggs.getEasterEggTitle(var1.username) != null && color == -1) {
-					title = EasterEggs.getEasterEggTitle(var1.username);
-					alpha = 0.0F;
-				}*/
-				if (!title.equals("[hide]")) {
-					String lines[] = title.split("\\n");
-					double y = par4;
-					for (int line = 0; line < lines.length; line++) {
-						title = lines[line];
-						par4 = y + (0.275D * (lines.length - line - 1));
-
-						if (AccessoryHandler.hasAccessory(par1EntityPlayer.username, AccessoryType.NOTCHHAT)) {
-							par4 = par4 + 0.275d;
-						} else if (AccessoryHandler.hasAccessory(par1EntityPlayer.username, AccessoryType.TOPHAT)) {
-							par4 = par4 + 0.5d;
-						}
-
-						if (!par1EntityPlayer.isSneaking()) {
-							if (par1EntityPlayer.isPlayerSleeping()) {
-								this.renderLivingLabel(par1EntityPlayer, title, par2, par4 - 1.5D, par6, 64);
-							} else {
-								this.renderLivingLabel(par1EntityPlayer, title, par2, par4, par6, 64);
-								// TODO: Adapation needed.
-								/*if (color != -1) {
-									this.renderLivingLabel(var1, title, var2, var4, var6, 64, color, color);
-								} else {
-									this.renderLivingLabel(par1EntityPlayer, title, par2, par4, par6, 64);
-								}*/
-							}
-						} else {
-							title = org.bukkit.ChatColor.stripColor(title); //strip colors when sneaking
-							FontRenderer var14 = this.getFontRendererFromRenderManager();
-							GL11.glPushMatrix();
-							GL11.glTranslatef((float)par2 + 0.0F, (float)par4 + 2.3F, (float)par6);
-							GL11.glNormal3f(0.0F, 1.0F, 0.0F);
-							GL11.glRotatef(-this.renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
-							GL11.glRotatef(this.renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
-							GL11.glScalef(-var9, -var9, var9);
-							GL11.glDisable(GL11.GL_LIGHTING);
-							GL11.glTranslatef(0.0F, 0.25F / var9, 0.0F);
-							GL11.glDepthMask(false);
-
-							GL11.glEnable(GL11.GL_BLEND);
-							GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-							Tessellator var15 = Tessellator.instance;
-							GL11.glDisable(GL11.GL_TEXTURE_2D);
-							var15.startDrawingQuads();
-							int var16 = var14.getStringWidth(title) / 2;
-							var15.setColorRGBA_F(0.0F, 0.0F, 0.0F, 0.25F);
-							var15.addVertex((double)(-var16 - 1), -1.0D, 0.0D);
-							var15.addVertex((double)(-var16 - 1), 8.0D, 0.0D);
-							var15.addVertex((double)(var16 + 1), 8.0D, 0.0D);
-							var15.addVertex((double)(var16 + 1), -1.0D, 0.0D);
-							var15.draw();
-							GL11.glEnable(GL11.GL_TEXTURE_2D);
-							GL11.glDepthMask(true);
-							var14.drawString(title, -var14.getStringWidth(title) / 2, 0, 553648127);
-							GL11.glEnable(GL11.GL_LIGHTING);
-
-							GL11.glDisable(GL11.GL_BLEND);
-							GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-							GL11.glPopMatrix();
-							// Spout End
-						}
-					}
-				}
-			}
-		}
 	}
 
 	/**
@@ -287,10 +191,14 @@ public class RenderPlayer extends RenderLiving {
 			GL11.glPopMatrix();
 		}
 
-		AccessoryHandler.renderAllAccessories(par1EntityPlayer, 0.0625F, par2); // Spout
-		
-		float var7;
+		// Spout Start
+		if (!par1EntityPlayer.isInvisible()){
+			AccessoryHandler.renderAllAccessories(par1EntityPlayer, 0.0625F, par2);
+		}
+		// Spout End
+
 		float var8;
+		float var7;
 
 		if (par1EntityPlayer.username.equals("deadmau5") && this.loadDownloadableImageTexture(par1EntityPlayer.skinUrl, (String)null)) {
 			for (int var20 = 0; var20 < 2; ++var20) {
@@ -312,7 +220,7 @@ public class RenderPlayer extends RenderLiving {
 
 		float var11;
 
-		if (this.loadDownloadableImageTexture(par1EntityPlayer.playerCloakUrl, (String)null) && !par1EntityPlayer.getHasActivePotion() && !par1EntityPlayer.getHideCape()) {
+		if (this.loadDownloadableImageTexture(par1EntityPlayer.cloakUrl, (String)null) && !par1EntityPlayer.isInvisible() && !par1EntityPlayer.getHideCape()) {
 			GL11.glPushMatrix();
 			GL11.glTranslatef(0.0F, 0.0F, 0.125F);
 			double var22 = par1EntityPlayer.field_71091_bM + (par1EntityPlayer.field_71094_bP - par1EntityPlayer.field_71091_bM) * (double)par2 - (par1EntityPlayer.prevPosX + (par1EntityPlayer.posX - par1EntityPlayer.prevPosX) * (double)par2);
@@ -384,9 +292,9 @@ public class RenderPlayer extends RenderLiving {
 				GL11.glScalef(var7, -var7, var7);
 				GL11.glRotatef(-100.0F, 1.0F, 0.0F, 0.0F);
 				GL11.glRotatef(45.0F, 0.0F, 1.0F, 0.0F);
-			// Spout Start
+				// Spout Start
 			} else if (Item.itemsList[var21.itemID].isFull3D() || var21.itemID == Item.flint.itemID && MaterialData.getCustomItem(var21.getItemDamage()) instanceof org.spoutcraft.api.material.Tool) {
-			// Spout End
+				// Spout End
 				var7 = 0.625F;
 
 				if (Item.itemsList[var21.itemID].shouldRotateAroundWhenRendering()) {
@@ -442,10 +350,37 @@ public class RenderPlayer extends RenderLiving {
 
 	protected void renderPlayerScale(EntityPlayer par1EntityPlayer, float par2) {
 		float var3 = 0.9375F;
+		// Spout Start
+		VIP vip = par1EntityPlayer.vip;
+		if (vip != null) {
+			var3 = vip.getScale();
+		}
+		// Spout End
 		GL11.glScalef(var3, var3, var3);
 	}
 
-	public void func_82441_a(EntityPlayer par1EntityPlayer) {
+	protected void func_96450_a(EntityPlayer par1EntityPlayer, double par2, double par4, double par6, String par8Str, float par9, double par10) {
+		if (par10 < 100.0D) {
+			Scoreboard var12 = par1EntityPlayer.getWorldScoreboard();
+			ScoreObjective var13 = var12.func_96539_a(2);
+
+			if (var13 != null) {
+				Score var14 = var12.func_96529_a(par1EntityPlayer.getEntityName(), var13);
+
+				if (par1EntityPlayer.isPlayerSleeping()) {
+					this.renderLivingLabel(par1EntityPlayer, var14.func_96652_c() + " " + var13.getDisplayName(), par2, par4 - 1.5D, par6, 64);
+				} else {
+					this.renderLivingLabel(par1EntityPlayer, var14.func_96652_c() + " " + var13.getDisplayName(), par2, par4, par6, 64);
+				}
+
+				par4 += (double)((float)this.getFontRendererFromRenderManager().FONT_HEIGHT * 1.15F * par9);
+			}
+		}
+
+		super.func_96449_a(par1EntityPlayer, par2, par4, par6, par8Str, par9, par10);
+	}
+
+	public void renderFirstPersonArm(EntityPlayer par1EntityPlayer) {
 		float var2 = 1.0F;
 		GL11.glColor3f(var2, var2, var2);
 		this.modelBipedMain.onGround = 0.0F;
@@ -477,11 +412,8 @@ public class RenderPlayer extends RenderLiving {
 		}
 	}
 
-	/**
-	 * Passes the specialRender and renders it
-	 */
-	protected void passSpecialRender(EntityLiving par1EntityLiving, double par2, double par4, double par6) {
-		this.renderName((EntityPlayer)par1EntityLiving, par2, par4, par6);
+	protected void func_96449_a(EntityLiving par1EntityLiving, double par2, double par4, double par6, String par8Str, float par9, double par10) {
+		this.func_96450_a((EntityPlayer)par1EntityLiving, par2, par4, par6, par8Str, par9, par10);
 	}
 
 	/**
@@ -516,6 +448,10 @@ public class RenderPlayer extends RenderLiving {
 	 */
 	protected void renderLivingAt(EntityLiving par1EntityLiving, double par2, double par4, double par6) {
 		this.renderPlayerSleep((EntityPlayer)par1EntityLiving, par2, par4, par6);
+	}
+
+	protected void func_98190_a(EntityLiving par1EntityLiving) {
+		this.func_98191_a((EntityPlayer)par1EntityLiving);
 	}
 
 	public void doRenderLiving(EntityLiving par1EntityLiving, double par2, double par4, double par6, float par8, float par9) {

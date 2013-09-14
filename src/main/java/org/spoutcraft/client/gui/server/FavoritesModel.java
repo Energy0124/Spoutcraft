@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -30,8 +30,6 @@ import java.util.HashMap;
 
 import org.yaml.snakeyaml.Yaml;
 
-import org.spoutcraft.api.gui.AbstractListModel;
-import org.spoutcraft.api.gui.ListWidgetItem;
 import org.spoutcraft.client.SpoutClient;
 import org.spoutcraft.client.io.FileUtil;
 
@@ -40,9 +38,6 @@ public class FavoritesModel extends ServerModel {
 	}
 
 	public void load() {
-		boolean wasSandboxed = SpoutClient.isSandboxed();
-		if (wasSandboxed)
-			SpoutClient.disableSandbox();
 		try {
 			if (!getFile().exists()) {
 				importVanilla();
@@ -56,6 +51,7 @@ public class FavoritesModel extends ServerModel {
 					for (HashMap<String, Object> item : list) {
 						String title = "";
 						String ip = "";
+						String country = "";
 						int port = ServerItem.DEFAULT_PORT;
 						int databaseId = -1;
 						Boolean acceptsTextures = null;
@@ -74,7 +70,12 @@ public class FavoritesModel extends ServerModel {
 						if (item.containsKey("acceptsTextures")) {
 							acceptsTextures = (Boolean) item.get("acceptsTextures");
 						}
-						addServer(title, ip, port, databaseId, acceptsTextures);
+
+						if (item.containsKey("country")) {
+							country = (String) item.get("country");
+						}
+
+						addServer(title, ip, port, databaseId, acceptsTextures, country);
 					}
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
@@ -82,18 +83,10 @@ public class FavoritesModel extends ServerModel {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			if (wasSandboxed) {
-				SpoutClient.enableSandbox();
-			}
 		}
 	}
 
 	private void importLegacyTXT() {
-		boolean wasSandboxed = SpoutClient.isSandboxed();
-		if (wasSandboxed) {
-			SpoutClient.disableSandbox();
-		}
 		File favorites = new File(FileUtil.getCacheDir(), "favorites.txt");
 		if (favorites.exists()) {
 			FileReader reader;
@@ -134,9 +127,6 @@ public class FavoritesModel extends ServerModel {
 
 			//favorites.delete(); // TODO Check if that is working first...
 		}
-		if (wasSandboxed) {
-			SpoutClient.enableSandbox();
-		}
 	}
 
 	private void importVanilla() {
@@ -153,20 +143,15 @@ public class FavoritesModel extends ServerModel {
 			data.put("ip", item.getIp());
 			data.put("port", item.getPort());
 			data.put("databaseid", item.getDatabaseId());
+			data.put("country", item.getCountry());
+			item.showPing = true;
 			if (item.getAcceptsTextures() != null) {
 				data.put("acceptsTextures", item.getAcceptsTextures().booleanValue());
 			}
 			list.add(data);
 		}
 		try {
-			boolean wasSandboxed = SpoutClient.isSandboxed();
-			if (wasSandboxed) {
-				SpoutClient.disableSandbox();
-			}
 			yaml.dump(list, new FileWriter(getFile()));
-			if (wasSandboxed) {
-				SpoutClient.enableSandbox();
-			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -204,6 +189,21 @@ public class FavoritesModel extends ServerModel {
 			item.setAcceptsTextures(acceptsTextures);
 		}
 		item.poll();
+		items.add(item);
+		sizeChanged();
+		if (gui != null) {
+			gui.updateButtons();
+		}
+	}
+
+	public void addServer(String title, String ip, int port, int databaseId, Boolean acceptsTextures, String country) {
+		ServerItem item = new ServerItem(title, ip, port, databaseId);
+		item.setShowPing(true);
+		if (acceptsTextures != null) {
+			item.setAcceptsTextures(acceptsTextures);
+		}
+		item.poll();
+		item.country = country;
 		items.add(item);
 		sizeChanged();
 		if (gui != null) {

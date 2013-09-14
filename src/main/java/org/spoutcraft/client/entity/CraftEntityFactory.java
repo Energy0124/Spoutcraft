@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -20,19 +20,17 @@
 package org.spoutcraft.client.entity;
 
 import net.minecraft.src.*;
-import org.spoutcraft.api.entity.Entity;
+
 import org.spoutcraft.client.player.ClientPlayer;
 
 public class CraftEntityFactory {
-
-	public static Entity getCraftEntity(net.minecraft.src.Entity aThis) {
-		if(aThis instanceof EntityPlayerSP) {
+	public static CraftEntity getCraftEntity(net.minecraft.src.Entity aThis) {
+		if (aThis instanceof EntityPlayerSP) {
 			return ClientPlayer.getInstance();
 		}
-		if(aThis instanceof EntityLiving) {
+		if (aThis instanceof EntityLiving) {
 			return new CraftLivingEntity((EntityLiving)aThis);
 		}
-		return null; //Should not break, got most of the important stuff
+		return null; // Should not break, got most of the important stuff
 	}
-
 }

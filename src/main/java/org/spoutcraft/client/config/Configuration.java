@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -20,38 +20,36 @@
 package org.spoutcraft.client.config;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.lwjgl.opengl.GL11;
+
 import net.minecraft.client.Minecraft;
 
 import org.spoutcraft.client.io.FileUtil;
 
-import org.lwjgl.opengl.GL11;
-
 public class Configuration {
-
 	// Client settings
 	private static int advancedOpenGL = 0;
 	private static boolean anaglyph3D = false;
 	private static int autosave = 0;
-	private static int betterGrass = 0;
+	public static int betterGrass = 0;
 	private static boolean fancyBiomeColors = false;
 	private static boolean waterBiomeColors = true;
 	private static float brightnessSlider = 1F;
-	private static boolean clearWater = false;
+	public static boolean chatColorAssist = false;
 	private static boolean fancyClouds = false;
 	private static boolean fancyFog = false;
 	private static boolean fancyGraphics = false;
-	private static boolean fancyGrass = false;
+	public static boolean fancyGrass = false;
 	private static boolean fancyTrees = false;
 	private static boolean fancyWater = false;
 	private static boolean fancyWeather = false;
 	private static boolean farView = false;
-	private static boolean fancyLight = false;
+	public static boolean fancyLight = false;
 	private static boolean fancyParticles = false;
 	private static int fastDebug = 0;
 	private static int guiScale = 0;
@@ -59,14 +57,25 @@ public class Configuration {
 	private static int chunkRenderPasses = 2;
 	private static int renderDistance = 0;
 	private static int signDistance = 16;
-	private static boolean sky = true;
+	public static boolean cheatsky = true;
+	private static boolean forcesky = false;
+	private static boolean showsky = true;
+	public static boolean cheatclearWater = false;
+	private static boolean forceclearWater = false;
+	private static boolean showclearWater = false;
+	public static boolean cheatvoidFog = false;
+	private static boolean forcevoidFog = false;
+	private static boolean showvoidFog = true;
+	public static boolean cheatweather = true;
+	private static boolean forceweather = false;
+	private static boolean showweather = true;
+	public static boolean cheatstars = true;
+	private static boolean forcestars = false;
+	private static boolean showstars = true;
 	private static boolean smoothFPS = false;
-	private static float smoothLighting = 1F;
-	private static boolean stars = true;
+	public static float smoothLighting = 1F;
 	private static int time = 0;
 	private static boolean viewBobbing = false;
-	private static boolean voidFog = true;
-	private static boolean weather = true;
 	private static boolean delayedTooltips = true;
 	private static float mipmapsPercent = 0F;
 	private static boolean automatePerformance = true;
@@ -77,23 +86,23 @@ public class Configuration {
 	private static boolean replaceBlocks = false;
 	private static boolean hotbarQuickKeysEnabled = true;
 	private static boolean resizeScreenshots = false;
-	private static int resizedScreenshotWidth = 6000;
-	private static int resizedScreenshotHeight = 3200;
 	private static float chatOpacity = 0.5f;
 	private static int mainMenuState = defaultMenuState();
 	private static boolean connectedTextures = false;
 	private static boolean advancedOptions = false;
 	private static boolean randomMobTextures = true;
-	private static boolean ambientOcclusion = true;
+	public static boolean ambientOcclusion = false;
 	private static boolean serverTexturePromptsEnabled = true;
+	public static boolean showHotbarText = true;
+	public static int aaSampling = 0;
 
-	//Config-specific
+	// Config specific
 	private static transient Map<String, Object> defaultSettings = new HashMap<String, Object>();
 	private static transient boolean dirty = false;
 	private static transient boolean vsync = false;
 
 	public static synchronized void read() {
-		//Cleanup old
+		// Cleanup old
 		File old = new File(FileUtil.getConfigDir(), "spoutcraft.properties");
 		old.delete();
 
@@ -155,6 +164,7 @@ public class Configuration {
 	}
 
 	private static void updateMCConfig() {
+		Minecraft.theMinecraft.gameSettings.ambientOcclusion = Configuration.isAmbientOcclusion() ? 2 : 0;
 		Minecraft.theMinecraft.gameSettings.anaglyph = Configuration.isAnaglyph3D();
 		Minecraft.theMinecraft.gameSettings.renderDistance = Configuration.getRenderDistance();
 		Minecraft.theMinecraft.gameSettings.fancyGraphics = Configuration.isFancyGraphics();
@@ -278,11 +288,11 @@ public class Configuration {
 	}
 
 	public static synchronized boolean isClearWater() {
-		return clearWater;
+		return showclearWater;
 	}
 
-	public static synchronized void setClearWater(boolean clearWater) {
-		Configuration.clearWater = clearWater;
+	public static synchronized void setClearWater(boolean showclearWater) {
+		Configuration.showclearWater = showclearWater;
 		onPropertyChange();
 	}
 
@@ -430,12 +440,20 @@ public class Configuration {
 		onPropertyChange();
 	}
 
-	public static synchronized boolean isSky() {
-		return sky;
+	public static synchronized boolean isCheatSky() {
+		return cheatsky;
 	}
 
-	public static synchronized void setSky(boolean sky) {
-		Configuration.sky = sky;
+	public static synchronized boolean isForceSky() {
+		return forcesky;
+	}
+
+	public static synchronized boolean isSky() {
+		return showsky;
+	}
+
+	public static synchronized void setSky(boolean showsky) {
+		Configuration.showsky = showsky;
 		onPropertyChange();
 	}
 
@@ -457,12 +475,20 @@ public class Configuration {
 		onPropertyChange();
 	}
 
-	public static synchronized boolean isStars() {
-		return stars;
+	public static synchronized boolean isCheatStars() {
+		return cheatstars;
 	}
 
-	public static synchronized void setStars(boolean stars) {
-		Configuration.stars = stars;
+	public static synchronized boolean isForceStars() {
+		return forcestars;
+	}
+
+	public static synchronized boolean isStars() {
+		return showstars;
+	}
+
+	public static synchronized void setStars(boolean showstars) {
+		Configuration.showstars = showstars;
 		onPropertyChange();
 	}
 
@@ -484,21 +510,37 @@ public class Configuration {
 		onPropertyChange();
 	}
 
-	public static synchronized boolean isVoidFog() {
-		return voidFog;
+	public static synchronized boolean isCheatVoidFog() {
+		return cheatvoidFog;
 	}
 
-	public static synchronized void setVoidFog(boolean voidFog) {
-		Configuration.voidFog = voidFog;
+	public static synchronized boolean isForceVoidFog() {
+		return forcevoidFog;
+	}
+
+	public static synchronized boolean isVoidFog() {
+		return showvoidFog;
+	}
+
+	public static synchronized void setVoidFog(boolean showvoidFog) {
+		Configuration.showvoidFog = showvoidFog;
 		onPropertyChange();
 	}
 
-	public static synchronized boolean isWeather() {
-		return weather;
+	public static synchronized boolean isCheatWeather() {
+		return cheatweather;
 	}
 
-	public static synchronized void setWeather(boolean weather) {
-		Configuration.weather = weather;
+	public static synchronized boolean isForceWeather() {
+		return forceweather;
+	}
+
+	public static synchronized boolean isWeather() {
+		return showweather;
+	}
+
+	public static synchronized void setWeather(boolean showweather) {
+		Configuration.showweather = showweather;
 		onPropertyChange();
 	}
 
@@ -592,24 +634,6 @@ public class Configuration {
 		onPropertyChange();
 	}
 
-	public static synchronized int getResizedScreenshotWidth() {
-		return resizedScreenshotWidth;
-	}
-
-	public static synchronized void setResizedScreenshotWidth(int resizedScreenshotWidth) {
-		Configuration.resizedScreenshotWidth = resizedScreenshotWidth;
-		onPropertyChange();
-	}
-
-	public static synchronized int getResizedScreenshotHeight() {
-		return resizedScreenshotHeight;
-	}
-
-	public static synchronized void setResizedScreenshotHeight(int resizedScreenshotHeight) {
-		Configuration.resizedScreenshotHeight = resizedScreenshotHeight;
-		onPropertyChange();
-	}
-
 	public static synchronized float getChatOpacity() {
 		return chatOpacity;
 	}
@@ -654,7 +678,7 @@ public class Configuration {
 		Configuration.advancedOptions = advancedOptions;
 		onPropertyChange();
 	}
-	
+
 	public static synchronized void setAmbientOcclusion(boolean ambientOcclusion) {
 		Configuration.ambientOcclusion = ambientOcclusion;
 		onPropertyChange();
@@ -663,7 +687,7 @@ public class Configuration {
 	public static synchronized boolean isAmbientOcclusion() {
 		return ambientOcclusion;
 	}
-	
+
 	public static synchronized boolean isServerTexturePromptsEnabled() {
 		return serverTexturePromptsEnabled;
 	}
@@ -683,5 +707,53 @@ public class Configuration {
 			write();
 		}
 	}
+	
+	public static void setAASampling() {
+		if (aaSampling == 0) {
+			aaSampling = 2;
+			return;
+		}
+		
+		if (aaSampling == 2) {
+			aaSampling = 4;
+			return;
+		}
+		
+		if (aaSampling == 4) {
+			aaSampling = 6;
+			return;
+		}
+		
+		if (aaSampling == 6) {
+			aaSampling = 8;
+			return;
+		}
+		
+		if (aaSampling == 8) {
+			aaSampling = 0;
+			return;
+		}
+	}
 
+	public static int getAASampling() {
+		return aaSampling;
+	}
+	
+	public static boolean isShowingChatColorAssist() {
+		return chatColorAssist;
+	}
+	
+	public static synchronized void setChatColorAssist(boolean chatColorAssist) {
+		Configuration.chatColorAssist = chatColorAssist;
+		onPropertyChange();
+	}
+	
+	public static synchronized boolean isShowingHotbarText() {
+		return showHotbarText;
+	}
+	
+	public static synchronized void setShowingHotbarText(boolean showingHotbarText) {
+		Configuration.showHotbarText = showingHotbarText;
+		onPropertyChange();
+	}
 }

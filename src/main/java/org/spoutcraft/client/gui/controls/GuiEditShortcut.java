@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -22,7 +22,6 @@ package org.spoutcraft.client.gui.controls;
 import net.minecraft.src.GuiScreen;
 
 import org.spoutcraft.api.Spoutcraft;
-import org.spoutcraft.api.addon.Addon;
 import org.spoutcraft.api.gui.Button;
 import org.spoutcraft.api.gui.Color;
 import org.spoutcraft.api.gui.GenericButton;
@@ -30,9 +29,7 @@ import org.spoutcraft.api.gui.GenericLabel;
 import org.spoutcraft.api.gui.GenericTextField;
 import org.spoutcraft.api.gui.GenericTextProcessor;
 import org.spoutcraft.api.gui.Label;
-import org.spoutcraft.api.gui.RenderPriority;
 import org.spoutcraft.api.gui.TextField;
-import org.spoutcraft.api.gui.WidgetAnchor;
 import org.spoutcraft.client.SpoutClient;
 import org.spoutcraft.client.controls.Shortcut;
 import org.spoutcraft.client.controls.SimpleKeyBindingManager;
@@ -82,8 +79,6 @@ public class GuiEditShortcut extends GuiScreen {
 	}
 
 	public void initGui() {
-		Addon spoutcraft = Spoutcraft.getAddonManager().getAddon("Spoutcraft");
-
 		int labelWidth = 75;
 		int top = 10;
 		int left = 10;
@@ -92,41 +87,41 @@ public class GuiEditShortcut extends GuiScreen {
 
 		recordButton = new GenericButton();
 		recordButton.setGeometry(width - 160, top - 3, 150, labelHeight);
-		getScreen().attachWidget(spoutcraft, recordButton);
+		getScreen().attachWidget("Spoutcraft", recordButton);
 		updateRecordButton();
 
 		titleLabel = new GenericLabel("Name:");
 		titleLabel.setGeometry(left, top + 3, labelWidth, labelHeight);
-		getScreen().attachWidget(spoutcraft, titleLabel);
+		getScreen().attachWidget("Spoutcraft", titleLabel);
 
 		commandName = new GenericTextField();
 		commandName.setGeometry(right, top - 1, (int) (width - right - recordButton.getWidth() - 20), 16);
 		commandName.setText(item.getTitle());
 		commandName.setMaximumCharacters(0);
 		commandName.setPlaceholder("Enter a name here");
-		getScreen().attachWidget(spoutcraft, commandName);
+		getScreen().attachWidget("Spoutcraft", commandName);
 
 		top += 23;
 
 		commandLabel = new GenericLabel("Command:");
 		commandLabel.setGeometry(left, top + 3, labelWidth, labelHeight);
-		getScreen().attachWidget(spoutcraft, commandLabel);
+		getScreen().attachWidget("Spoutcraft", commandLabel);
 
 		commandText = new GenericTextField();
 		commandText.setGeometry(right, top - 1, width - right - 10, 16);
 		commandText.setMaximumCharacters(0);
 		commandText.setPlaceholder("Enter new command here, then click \"Add Command\"");
-		getScreen().attachWidget(spoutcraft, commandText);
+		getScreen().attachWidget("Spoutcraft", commandText);
 
 		top += 23;
 
 		delayLabel = new GenericLabel("Delay (ms)");
 		delayLabel.setGeometry(left, top + 3, labelWidth, labelHeight);
-		getScreen().attachWidget(spoutcraft, delayLabel);
+		getScreen().attachWidget("Spoutcraft", delayLabel);
 
 		delayText = new GenericTextField();
 		delayText.setGeometry(right, top - 1, width - right - 10, 16);
-		delayText.setText(item.getDelay()+"");
+		delayText.setText(item.getDelay() + "");
 		delayText.setTextProcessor(new GenericTextProcessor() {
 			protected boolean insert(char c) {
 				if (c >= '0' && c <= '9') {
@@ -146,33 +141,33 @@ public class GuiEditShortcut extends GuiScreen {
 				return super.insert(s);
 			}
 		});
-		getScreen().attachWidget(spoutcraft, delayText);
+		getScreen().attachWidget("Spoutcraft", delayText);
 
 		top += 23;
 
 		slot = new GuiCommandsSlot(this);
 		slot.setGeometry(0, top, width, this.height - top - 30);
-		getScreen().attachWidget(spoutcraft, slot);
+		getScreen().attachWidget("Spoutcraft", slot);
 
 		doneButton = new GenericButton("Done");
 		doneButton.setHeight(20).setWidth(50);
 		doneButton.setX(10).setY(height - 25);
-		getScreen().attachWidget(spoutcraft, doneButton);
+		getScreen().attachWidget("Spoutcraft", doneButton);
 
 		addButton = new GenericButton("Add Command");
 		addButton.setHeight(20).setWidth(100);
 		addButton.setX(70).setY(height - 25);
-		getScreen().attachWidget(spoutcraft, addButton);
+		getScreen().attachWidget("Spoutcraft", addButton);
 
 		editButton = new GenericButton("Edit Command");
 		editButton.setHeight(20).setWidth(100);
 		editButton.setX(180).setY(height - 25);
-		getScreen().attachWidget(spoutcraft, editButton);
+		getScreen().attachWidget("Spoutcraft", editButton);
 
 		removeButton = new GenericButton("Remove Command");
 		removeButton.setHeight(20).setWidth(100);
 		removeButton.setX(290).setY(height - 25);
-		getScreen().attachWidget(spoutcraft, removeButton);
+		getScreen().attachWidget("Spoutcraft", removeButton);
 
 		updateButtons();
 

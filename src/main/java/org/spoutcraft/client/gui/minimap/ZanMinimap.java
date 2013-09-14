@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -70,7 +70,7 @@ public class ZanMinimap {
 	 * @param mc Minecraft instance to initialize obfhub.game with
 	 */
 	public void onRenderTick() {
-		if (Minecraft.theMinecraft.thePlayer == null || SpoutClient.getInstance().getWorld() == null) {
+		if (Minecraft.theMinecraft.thePlayer == null || SpoutClient.getInstance().getRawWorld() == null) {
 			return;
 		}
 
@@ -82,7 +82,7 @@ public class ZanMinimap {
 			return;
 		}
 
-		if (!Spoutcraft.hasPermission("spout.client.minimap")) {
+		if (!Spoutcraft.hasPermission("spout.plugin.minimap")) {
 			return;
 		}
 

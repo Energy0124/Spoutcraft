@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -29,8 +29,6 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.spoutcraft.client.SpoutClient;
-
 public class FileDownloadThread extends Thread {
 	private static FileDownloadThread instance = null;
 	private final ConcurrentLinkedQueue<Download> downloads = new ConcurrentLinkedQueue<Download>();
@@ -38,6 +36,7 @@ public class FileDownloadThread extends Thread {
 	private final HashSet<String> failedUrls = new HashSet<String>();
 	private final byte[] buffer = new byte[1024*1024];
 	private volatile String activeDownload = null;
+	private boolean spoutDebug = false;
 	public static AtomicLong preCacheCompleted = new AtomicLong(0L);
 
 	protected FileDownloadThread() {
@@ -72,14 +71,11 @@ public class FileDownloadThread extends Thread {
 			Iterator<Runnable> i = actions.iterator();
 			while (i.hasNext()) {
 				Runnable action = i.next();
-				boolean oldLock = SpoutClient.enableSandbox();
 				try {
 					action.run();
 				} catch(Exception e) {
 					System.out.println("Could not run Runnable for download finish:");
 					e.printStackTrace();
-				} finally {
-					SpoutClient.enableSandbox(oldLock);
 				}
 				i.remove();
 			}
@@ -107,7 +103,9 @@ public class FileDownloadThread extends Thread {
 			if (next != null && !failedUrls.contains(next.getDownloadUrl())) {
 				try {
 					if (!next.isDownloaded()) {
-						System.out.println("Downloading File: " + next.getDownloadUrl());
+						if (spoutDebug) {
+							System.out.println("Downloading File: " + next.getDownloadUrl());
+						}
 						activeDownload = FileUtil.getFileName(next.getDownloadUrl());
 						URL url = new URL(next.getDownloadUrl());
 						URLConnection conn = url.openConnection();
@@ -132,7 +130,9 @@ public class FileDownloadThread extends Thread {
 							if (length > 0 && totalBytes > (last + step)) {
 								last = totalBytes;
 								long mb = totalBytes/(1024*1024);
-								System.out.println("Downloading: " + next.getDownloadUrl() + " " + mb + "MB/" + (length/(1024*1024)));
+								if (spoutDebug) {
+									System.out.println("Downloading: " + next.getDownloadUrl() + " " + mb + "MB/" + (length/(1024*1024)));
+								}
 							}
 							try {
 								Thread.sleep(25);
@@ -142,7 +142,9 @@ public class FileDownloadThread extends Thread {
 						in.close();
 						bos.close();
 						next.move();
-						//System.out.println("File moved to: " + next.directory.getCanonicalPath());
+						if (spoutDebug) {
+							System.out.println("File moved to: " + next.directory.getCanonicalPath());
+						}
 						try {
 							sleep(10); // Cool off after heavy network useage
 						} catch (InterruptedException e) {}
@@ -152,7 +154,9 @@ public class FileDownloadThread extends Thread {
 					}
 				} catch (Exception e) {
 					failedUrls.add(next.getDownloadUrl());
-					//System.out.println("Download of " + next.getDownloadUrl() + " Failed!");
+					if (spoutDebug) {
+						System.out.println("Download of " + next.getDownloadUrl() + " Failed!");
+					}
 				}
 				activeDownload = null;
 			} else {

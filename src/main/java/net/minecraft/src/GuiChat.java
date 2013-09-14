@@ -6,8 +6,9 @@ import java.util.Iterator;
 import java.util.List;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+
 // Spout Start
-import net.minecraft.client.Minecraft;
+import org.bukkit.ChatColor;
 import org.spoutcraft.client.config.Configuration;
 // Spout End
 
@@ -101,9 +102,9 @@ public class GuiChat extends GuiScreen {
 		} else if (par2 == 208) {
 			this.getSentHistory(1);
 		} else if (par2 == 201) {
-			this.mc.ingameGUI.getChatGUI().scroll(19);
+			this.mc.ingameGUI.getChatGUI().scroll(this.mc.ingameGUI.getChatGUI().func_96127_i() - 1);
 		} else if (par2 == 209) {
-			this.mc.ingameGUI.getChatGUI().scroll(-19);
+			this.mc.ingameGUI.getChatGUI().scroll(-this.mc.ingameGUI.getChatGUI().func_96127_i() + 1);
 		} else {
 			this.inputField.textboxKeyTyped(par1, par2);
 		}
@@ -146,7 +147,7 @@ public class GuiChat extends GuiScreen {
 				if (var5 != null) {
 					if (this.mc.gameSettings.chatLinksPrompt) {
 						this.clickedURI = var5;
-						this.mc.displayGuiScreen(new GuiConfirmOpenLink(this, var4.getClickedUrl(), 0));
+						this.mc.displayGuiScreen(new GuiConfirmOpenLink(this, var4.getClickedUrl(), 0, false));
 					} else {
 						this.func_73896_a(var5);
 					}
@@ -270,6 +271,34 @@ public class GuiChat extends GuiScreen {
 	public void drawScreen(int par1, int par2, float par3) {
 		drawRect(2, this.height - 14, this.width - 2, this.height - 2, Integer.MIN_VALUE);
 		this.inputField.drawTextBox();
+		// Spout Start
+		if (Configuration.isShowingChatColorAssist()) {
+			for(int c = 0; c < 16; c++) {
+				ChatColor value = ChatColor.getByCode(c);
+				String name = value.name().toLowerCase();
+				boolean lastUnderscore = true;
+				String parsedName = "";
+				for(int chr = 0; chr < name.length(); chr++) {
+					char ch = name.charAt(chr);
+					if(lastUnderscore) {
+						ch = Character.toUpperCase(ch);
+					}
+					if(ch == '_') {
+						lastUnderscore = true;
+						ch = ' ';
+					} else {
+						lastUnderscore = false;
+					}
+					parsedName += ch;
+				}
+				char code = (char) ('0' + c);
+				if(c >= 10) {
+					code = (char) ('a' + c - 10);
+				}
+				fontRenderer.drawStringWithShadow("&" + code + " - " + value + parsedName, width - 90, 70 + c * 10, 0xffffffff);
+			}
+		}
+		// Spout End
 		super.drawScreen(par1, par2, par3);
 	}
 

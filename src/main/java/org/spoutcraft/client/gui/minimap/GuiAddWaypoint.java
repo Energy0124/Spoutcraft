@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -24,7 +24,6 @@ import org.lwjgl.input.Keyboard;
 import net.minecraft.src.GuiScreen;
 
 import org.spoutcraft.api.Spoutcraft;
-import org.spoutcraft.api.addon.Addon;
 import org.spoutcraft.api.gui.Button;
 import org.spoutcraft.api.gui.GenericButton;
 import org.spoutcraft.api.gui.GenericLabel;
@@ -32,7 +31,6 @@ import org.spoutcraft.api.gui.GenericTextField;
 import org.spoutcraft.api.gui.RenderPriority;
 import org.spoutcraft.api.gui.TextField;
 import org.spoutcraft.client.SpoutClient;
-import org.spoutcraft.client.config.Configuration;
 
 public class GuiAddWaypoint extends GuiScreen {
 	Button done, cancel, delete;
@@ -61,13 +59,11 @@ public class GuiAddWaypoint extends GuiScreen {
 	}
 
 	public void initGui() {
-		Addon spoutcraft = Spoutcraft.getAddonManager().getAddon("Spoutcraft");
-
 		GenericLabel label = new GenericLabel("Create Waypoint");
 		int size = Spoutcraft.getMinecraftFont().getTextWidth(label.getText());
 		label.setX((int) (width / 2 - size / 2)).setY(10);
 		label.setFixed(true).setPriority(RenderPriority.Lowest);
-		getScreen().attachWidget(spoutcraft, label);
+		getScreen().attachWidget("Spoutcraft", label);
 
 		int left = (int)(width / 2  - 155);
 		int right = (int)(width / 2 + 5);
@@ -76,14 +72,14 @@ public class GuiAddWaypoint extends GuiScreen {
 		size = Spoutcraft.getMinecraftFont().getTextWidth(label.getText());
 		label.setX(left).setY(70);
 		label.setFixed(true).setPriority(RenderPriority.Lowest);
-		getScreen().attachWidget(spoutcraft, label);
+		getScreen().attachWidget("Spoutcraft", label);
 
 		name = new GenericTextField();
 		name.setHeight(20).setWidth(300).setX(left).setY(81);
 		name.setMaximumCharacters(0);
 		name.setFixed(true).setPriority(RenderPriority.Lowest);
 		name.setText(toEdit.name);
-		getScreen().attachWidget(spoutcraft, name);
+		getScreen().attachWidget("Spoutcraft", name);
 
 		String text = "(" + x + ", " + y + ", " + z + ")";
 		if (!SpoutClient.getInstance().isCoordsCheat()) {
@@ -93,23 +89,23 @@ public class GuiAddWaypoint extends GuiScreen {
 		size = Spoutcraft.getMinecraftFont().getTextWidth(label.getText());
 		label.setX((int) (width / 2 - size / 2)).setY(106);
 		label.setFixed(true).setPriority(RenderPriority.Lowest);
-		getScreen().attachWidget(spoutcraft, label);
+		getScreen().attachWidget("Spoutcraft", label);
 
 		done = new GenericButton("Create");
 		if (existed) {
 			done.setText("Save");
 		}
 		done.setWidth(150).setHeight(20).setX(right).setY(200);
-		getScreen().attachWidget(spoutcraft, done);
+		getScreen().attachWidget("Spoutcraft", done);
 
 		cancel = new GenericButton("Cancel");
 		cancel.setWidth(150).setHeight(20).setX(left).setY(200);
-		getScreen().attachWidget(spoutcraft, cancel);
+		getScreen().attachWidget("Spoutcraft", cancel);
 
 		if (existed) {
 			delete = new GenericButton("Delete");
 			delete.setGeometry(left, 175, 150, 20);
-			getScreen().attachWidget(spoutcraft, delete);
+			getScreen().attachWidget("Spoutcraft", delete);
 		}
 	}
 

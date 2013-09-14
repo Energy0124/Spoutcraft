@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -226,7 +225,6 @@ public class SimpleFileCache {
 	}
 
 	public byte[] getData(long hash) {
-
 		Reference<byte[]> ref = cache.get(hash);
 
 		byte[] data = null;
@@ -392,7 +390,6 @@ public class SimpleFileCache {
 	}
 
 	private class FileCompare implements Comparator<File> {
-
 		public int compare(File f1, File f2) {
 			return getIntFromName(f1) - getIntFromName(f2);
 		}
@@ -400,7 +397,6 @@ public class SimpleFileCache {
 	}
 
 	private class DataWriteThread extends Thread {
-
 		private final List<MapEntry> entryList;
 		private final int id;
 

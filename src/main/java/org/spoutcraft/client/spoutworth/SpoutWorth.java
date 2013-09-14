@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -231,6 +231,11 @@ public class SpoutWorth {
 			Configuration.write();
 			return;
 		}
+		if (!Configuration.isAmbientOcclusion()) {
+			Configuration.setAmbientOcclusion(true);
+			Configuration.write();
+			return;
+		}
 	}
 
 	public void decreaseAppearance() {
@@ -357,6 +362,13 @@ public class SpoutWorth {
 		}
 		if (Configuration.isFancyWater()) {
 			Configuration.setFancyWater(false);
+			if (--downgrade == 0) {
+				Configuration.write();
+				return;
+			}
+		}
+		if (Configuration.isAmbientOcclusion()) {
+			Configuration.setAmbientOcclusion(false);
 			if (--downgrade == 0) {
 				Configuration.write();
 				return;

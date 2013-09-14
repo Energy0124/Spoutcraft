@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 // MCPatcher Start
-import com.pclewis.mcpatcher.mod.Colorizer;
+import com.prupe.mcpatcher.mod.ColorizeItem;
 // MCpatcher End
 
 public class PotionHelper {
@@ -21,7 +21,7 @@ public class PotionHelper {
 	public static final String redstoneEffect;
 	public static final String glowstoneEffect;
 	public static final String gunpowderEffect;
-	public static final String field_82818_l;
+	public static final String goldenCarrotEffect;
 	private static final HashMap potionRequirements = new HashMap();
 
 	/** Potion effect amplifier map */
@@ -61,7 +61,7 @@ public class PotionHelper {
 	 */
 	public static int calcPotionLiquidColor(Collection par0Collection) {
 		// MCPatcher Start
-		int var1 = Colorizer.getWaterBottleColor();
+		int var1 = ColorizeItem.getWaterBottleColor();
 		// MCPatcher End
 
 		if (par0Collection != null && !par0Collection.isEmpty()) {
@@ -471,7 +471,7 @@ public class PotionHelper {
 		potionRequirements.put(Integer.valueOf(Potion.moveSlowdown.getId()), "!0 & 1 & !2 & 3 & 3+6");
 		blazePowderEffect = "+0-1-2+3&4-4+13";
 		potionRequirements.put(Integer.valueOf(Potion.damageBoost.getId()), "0 & !1 & !2 & 3 & 3+6");
-		field_82818_l = "-0+1+2-3+13&4-4";
+		goldenCarrotEffect = "-0+1+2-3+13&4-4";
 		potionRequirements.put(Integer.valueOf(Potion.nightVision.getId()), "!0 & 1 & 2 & !3 & 2+6");
 		potionRequirements.put(Integer.valueOf(Potion.invisibility.getId()), "!0 & 1 & 2 & 3 & 2+6");
 		glowstoneEffect = "+5-6-7";

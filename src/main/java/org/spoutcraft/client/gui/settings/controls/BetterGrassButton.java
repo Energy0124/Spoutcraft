@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -21,32 +21,40 @@ package org.spoutcraft.client.gui.settings.controls;
 
 import net.minecraft.client.Minecraft;
 
-import org.spoutcraft.api.event.screen.ButtonClickEvent;
+import com.prupe.mcpatcher.TexturePackChangeHandler;
+
 import org.spoutcraft.client.config.Configuration;
+import org.spoutcraft.client.SpoutClient;
 
 public class BetterGrassButton extends AutomatedButton {
 	public BetterGrassButton() {
-		setTooltip("Better Grass\nOFF - default side grass texture, fastest\nFast - full side grass texture, slower\nFancy - dynamic side grass texture, slowest");
+		setTooltip("Better Grass / Snow\nOFF - default side grass texture, fastest\nFast - full side grass texture, slower\nFancy - dynamic side grass texture, slowest");
 	}
 
 	@Override
 	public String getText() {
 		switch(Configuration.getBetterGrass()) {
-			case 0: return "Better Grass: OFF";
-			case 1: return "Better Grass: Fast";
-			case 2: return "Better Grass: Fancy";
+			case 0: return "Better Grass / Snow: OFF";
+			case 1: return "Better Grass / Snow: Fast";
+			case 2: return "Better Grass / Snow: Fancy";
 		}
 		return "Unknown State: " + Configuration.getBetterGrass();
 	}
 
 	@Override
-	public void onButtonClick(ButtonClickEvent event) {
+	public void onButtonClick() {
 		Configuration.setBetterGrass(Configuration.getBetterGrass() + 1);
 		if (Configuration.getBetterGrass() > 2) {
 			Configuration.setBetterGrass(0);
 		}
 		Configuration.write();
-
+		
+		Minecraft game = SpoutClient.getHandle();
+		TexturePackChangeHandler.earlyInitialize("com.prupe.mcpatcher.mod.CTMUtils", "reset");
+		TexturePackChangeHandler.beforeChange1();
+		game.renderEngine.refreshTextureMaps();
+		TexturePackChangeHandler.afterChange1();
+		
 		if (Minecraft.theMinecraft.theWorld != null) {
 			Minecraft.theMinecraft.renderGlobal.updateAllRenderers();
 		}

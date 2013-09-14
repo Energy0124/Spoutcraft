@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -25,19 +25,15 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.src.EntityClientPlayerMP;
-import net.minecraft.src.Packet0KeepAlive;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+
 import org.spoutcraft.api.io.SpoutInputStream;
 import org.spoutcraft.api.io.SpoutOutputStream;
 import org.spoutcraft.client.precache.PrecacheManager;
 import org.spoutcraft.client.precache.PrecacheTuple;
 
 public class PacketSendPrecache implements CompressablePacket {
-
 	private byte[] fileData;
 	private String plugin;
 	private String version;
@@ -123,7 +119,6 @@ public class PacketSendPrecache implements CompressablePacket {
 	}
 
 	public void failure(int playerId) {
-
 	}
 
 	public PacketType getPacketType() {
@@ -135,7 +130,7 @@ public class PacketSendPrecache implements CompressablePacket {
 	}
 
 	public void run(int playerId) {
-		//Packet recieved, grabbing the zip file
+		// Packet recieved, grabbing the zip file
 		File zip = PrecacheManager.getPluginPreCacheFile(plugin, version);
 		if (zip.exists()) {
 			zip.delete();

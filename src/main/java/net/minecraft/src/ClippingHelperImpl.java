@@ -1,7 +1,9 @@
 package net.minecraft.src;
 
 import java.nio.FloatBuffer;
-import org.lwjgl.opengl.GL11;
+// Spout Start - Unused import
+//import org.lwjgl.opengl.GL11;
+// Spout End
 
 public class ClippingHelperImpl extends ClippingHelper {
 	private static ClippingHelperImpl instance = new ClippingHelperImpl();

@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -19,19 +19,14 @@
  */
 package org.spoutcraft.api.util;
 
-import org.spoutcraft.api.World;
-import org.spoutcraft.api.block.Block;
-
 public class FastLocation extends FastVector implements FixedLocation {
 	private final double yaw;
 	private final double pitch;
-	private final World world;
 
-	public FastLocation(int x, int y, int z, double yaw, double pitch, World world) {
+	public FastLocation(int x, int y, int z, double yaw, double pitch) {
 		super(x, y, z);
 		this.yaw = yaw;
 		this.pitch = pitch;
-		this.world = world;
 	}
 
 	public double getYaw() {
@@ -40,10 +35,6 @@ public class FastLocation extends FastVector implements FixedLocation {
 
 	public double getPitch() {
 		return pitch;
-	}
-
-	public World getWorld() {
-		return world;
 	}
 
 	public Vector getDirection() {
@@ -64,9 +55,5 @@ public class FastLocation extends FastVector implements FixedLocation {
 
 	public Vector toVector() {
 		return new MutableVector(x, y, z);
-	}
-
-	public Block getBlock() {
-		return world.getBlockAt(this);
 	}
 }

@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -25,7 +25,6 @@ import net.minecraft.src.ChunkCoordinates;
 import net.minecraft.src.EntityPlayerSP;
 
 import org.spoutcraft.api.GameMode;
-import org.spoutcraft.api.entity.ActivePlayer;
 import org.spoutcraft.api.gui.InGameHUD;
 import org.spoutcraft.api.gui.Screen;
 import org.spoutcraft.api.inventory.ItemStack;
@@ -36,7 +35,7 @@ import org.spoutcraft.api.util.MutableLocation;
 import org.spoutcraft.client.SpoutClient;
 import org.spoutcraft.client.gui.InGameScreen;
 
-public class ClientPlayer extends SpoutPlayer implements ActivePlayer {
+public class ClientPlayer extends SpoutPlayer {
 	private static ClientPlayer instance = null;
 	private RenderDistance min, max;
 	private InGameScreen mainScreen = new InGameScreen();
@@ -125,7 +124,7 @@ public class ClientPlayer extends SpoutPlayer implements ActivePlayer {
 
 	public Location getCompassTarget() {
 		ChunkCoordinates coords = SpoutClient.getHandle().thePlayer.getBedLocation();
-		return new MutableLocation(SpoutClient.getInstance().getWorld(), coords.posX, coords.posY, coords.posZ);
+		return new MutableLocation(coords.posX, coords.posY, coords.posZ);
 	}
 
 	public void sendRawMessage(String message) {
@@ -138,7 +137,6 @@ public class ClientPlayer extends SpoutPlayer implements ActivePlayer {
 	}
 
 	public void chat(String msg) {
-
 	}
 
 	public boolean performCommand(String command) {

@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -19,7 +19,6 @@
  */
 package org.spoutcraft.api.material;
 
-import org.spoutcraft.api.addon.Addon;
 import org.spoutcraft.api.block.design.BlockDesign;
 
 public interface CustomBlock extends Block {
@@ -27,7 +26,7 @@ public interface CustomBlock extends Block {
 
 	public String getFullName();
 
-	public Addon getAddon();
+	public String getAddon();
 
 	public CustomItem getBlockItem();
 

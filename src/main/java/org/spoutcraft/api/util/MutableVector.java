@@ -1,7 +1,7 @@
 /*
  * This file is part of Spoutcraft.
  *
- * Copyright (c) 2011-2012, Spout LLC <http://www.spout.org/>
+ * Copyright (c) 2011 Spout LLC <http://www.spout.org/>
  * Spoutcraft is licensed under the GNU Lesser General Public License.
  *
  * Spoutcraft is free software: you can redistribute it and/or modify
@@ -20,8 +20,6 @@
 package org.spoutcraft.api.util;
 
 import java.util.Random;
-
-import org.spoutcraft.api.World;
 
 /**
  * Represents a mutable vector. Because the components of Vectors are mutable, storing Vectors long term may be dangerous if passing code modifies the Vector later. If you want to keep around a Vector, it may be wise to call <code>clone()</code> in order to get a copy.
@@ -563,8 +561,8 @@ public class MutableVector implements Vector {
 	 * @param world
 	 * @return the location
 	 */
-	public Location toLocation(World world) {
-		return new MutableLocation(world, x, y, z);
+	public Location toLocation() {
+		return new MutableLocation(x, y, z);
 	}
 
 	/**
@@ -573,8 +571,8 @@ public class MutableVector implements Vector {
 	 * @param world
 	 * @return the location
 	 */
-	public Location toLocation(World world, float yaw, float pitch) {
-		return new MutableLocation(world, x, y, z, yaw, pitch);
+	public Location toLocation(float yaw, float pitch) {
+		return new MutableLocation(x, y, z, yaw, pitch);
 	}
 
 	/**
